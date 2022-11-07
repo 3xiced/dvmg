@@ -45,8 +45,8 @@ class Sigmoid(BasePattern):
 
     def __init__(self, gap_y_bottom: float = 0.05, gap_y_top: float = 0.8,
                  anomaly_begin_at_x: float = 98, anomaly_width: float = 2,
-                 anomaly_height: float = 0.6, min_x: float = 90, min_y: float = 0.01,
-                 min_end_x: float = 110) -> None:
+                 anomaly_height: float = 0.6, min_x: float = 130, min_y: float = 0.01,
+                 min_end_x: float = 250) -> None:
         self.__gap_y_bottom = gap_y_bottom
         self.__gap_y_top = gap_y_top - gap_y_bottom
         self.__anomaly_begin_at_x = anomaly_begin_at_x
@@ -67,15 +67,15 @@ class Sigmoid(BasePattern):
                 min_y, max_gap_y_bottom)
         self.__gap_y_top = np.random.uniform(
             self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
-        self.__anomaly_width = np.random.uniform(10, 60)
+        self.__anomaly_width = np.random.uniform(10, 100)
         self.__anomaly_begin_at_x = np.random.uniform(
             min_x, self.__min_end_x - self.__anomaly_width)
 
     def function(self, x: float) -> float:
         return 1 / ((1 / self.gap_y_top) + np.exp((-10 / self.anomaly_width) * (x - self.anomaly_begin_at_x - 5))) + self.gap_y_bottom
 
-    def generate_coordinates(self) -> dict:
-        coordinates: dict = dict()
-        for x in np.arange(0.0, 150.0, 0.1):
+    def generate_coordinates(self) -> dict[float, float]:
+        coordinates: dict[float, float] = dict()
+        for x in np.arange(0.0, self.min_end_x, 0.1):
             coordinates[x] = self.function(x)
         return coordinates
