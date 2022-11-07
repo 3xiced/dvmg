@@ -43,10 +43,10 @@ class Sigmoid(BasePattern):
     def min_end_x(self):
         return self.__min_end_x
 
-    def __init__(self, gap_y_bottom: float | None = 0.05, gap_y_top: float | None = 0.8,
-                 anomaly_begin_at_x: float | None = 98, anomaly_width: float | None = 2,
-                 anomaly_height: float | None = 0.6, min_x: float | None = 90, min_y: float | None = 0.01,
-                 min_end_x: float | None = 110) -> None:
+    def __init__(self, gap_y_bottom: float = 0.05, gap_y_top: float = 0.8,
+                 anomaly_begin_at_x: float = 98, anomaly_width: float = 2,
+                 anomaly_height: float = 0.6, min_x: float = 90, min_y: float = 0.01,
+                 min_end_x: float = 110) -> None:
         self.__gap_y_bottom = gap_y_bottom
         self.__gap_y_top = gap_y_top - gap_y_bottom
         self.__anomaly_begin_at_x = anomaly_begin_at_x
@@ -56,10 +56,10 @@ class Sigmoid(BasePattern):
         self.__min_y = min_y
         self.__min_end_x = min_end_x
 
-    # TODO: Сделать свои исключения
+    # TODO: #1 Сделать свои исключения
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
                             max_gap_y_bottom: float | None = None) -> None:
-        if max_gap_y_bottom > 1 - min_anomaly_height:
+        if max_gap_y_bottom is not None and max_gap_y_bottom > 1 - min_anomaly_height:
             raise Exception(
                 "Maximum bottom gap is bigger than minimum anomaly height.")
         self.__gap_y_bottom = np.random.uniform(
