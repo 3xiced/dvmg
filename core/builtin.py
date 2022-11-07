@@ -2,7 +2,7 @@ from .base import GeneratorWorkerBase, ObserverBase
 from patterns import BasePattern
 
 
-# TODO: Логирование
+# TODO: #2 Логирование
 class GeneratorWorker(GeneratorWorkerBase):
 
     _observers: list[ObserverBase] = []
@@ -38,7 +38,7 @@ class GeneratorWorker(GeneratorWorkerBase):
         for observer in self._observers:
             observer.onNewData(coordinates)
 
-    # TODO: Перевести на multiprocessing
+    # TODO: #3 Перевести на multiprocessing
     def run(self):
         for _ in range(10):
             self._pattern.random_start_values(130, 0.01, 0.1, 0.3)
