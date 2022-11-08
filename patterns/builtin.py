@@ -43,6 +43,7 @@ class Sigmoid(BasePattern):
     def min_end_x(self):
         return self.__min_end_x
 
+    # TODO: #7 Перегрузить __init__
     def __init__(self, gap_y_bottom: float = 0.05, gap_y_top: float = 0.8,
                  anomaly_begin_at_x: float = 98, anomaly_width: float = 2,
                  anomaly_height: float = 0.6, min_x: float = 130, min_y: float = 0.01,
@@ -57,6 +58,7 @@ class Sigmoid(BasePattern):
         self.__min_end_x = min_end_x
 
     # TODO: #1 Сделать свои исключения
+    # TODO: #8 Сделать нормальное задавание стартовых значений
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
                             max_gap_y_bottom: float | None = None) -> None:
         if max_gap_y_bottom is not None and max_gap_y_bottom > 1 - min_anomaly_height:
@@ -72,7 +74,7 @@ class Sigmoid(BasePattern):
         self.__anomaly_begin_at_x = np.random.uniform(
             min_x, self.__min_end_x - self.__anomaly_width)
 
-    # TODO: Возмжность наложения белого шума (дисперсия, мат. ожидание)
+    # TODO: #5 #4 Возмжность наложения белого шума (дисперсия, мат. ожидание)
     def function(self, x: float) -> float:
         return 1 / ((1 / self.gap_y_top) + np.exp((-10 / self.anomaly_width) * (x - self.anomaly_begin_at_x - 5))) + self.gap_y_bottom
 
