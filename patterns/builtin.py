@@ -67,15 +67,17 @@ class Sigmoid(BasePattern):
                 min_y, max_gap_y_bottom)
         self.__gap_y_top = np.random.uniform(
             self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
-        self.__anomaly_width = np.random.uniform(10, 100)
+        self.__anomaly_width = np.random.uniform(
+            self.__min_end_x * 0.05, self.__min_end_x * 0.3)
         self.__anomaly_begin_at_x = np.random.uniform(
             min_x, self.__min_end_x - self.__anomaly_width)
 
+    # TODO: Возмжность наложения белого шума (дисперсия, мат. ожидание)
     def function(self, x: float) -> float:
         return 1 / ((1 / self.gap_y_top) + np.exp((-10 / self.anomaly_width) * (x - self.anomaly_begin_at_x - 5))) + self.gap_y_bottom
 
-    def generate_coordinates(self) -> dict[float, float]:
+    def generate_coordinates(self, x_limit: int = 1000) -> dict[float, float]:
         coordinates: dict[float, float] = dict()
-        for x in np.arange(0.0, self.min_end_x, 0.1):
+        for x in np.arange(0, x_limit, 1):
             coordinates[x] = self.function(x)
         return coordinates

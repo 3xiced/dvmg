@@ -39,9 +39,12 @@ class GeneratorWorker(GeneratorWorkerBase):
             observer.onNewData(coordinates)
 
     # TODO: #3 Перевести на multiprocessing
-    def run(self):
-        for _ in range(10):
-            self._pattern.random_start_values(130, 0.01, 0.1, 0.3)
+    def run(self, min_x: float, min_y: float, min_anomaly_height: float,
+            max_gap_y_bottom: float | None = None):
+        # Число 3 - число генераций
+        for _ in range(3):
+            self._pattern.random_start_values(
+                min_x, min_y, min_anomaly_height, max_gap_y_bottom)
             coordinates = self._pattern.generate_coordinates()
             self.notify(coordinates)
         print("Done!")

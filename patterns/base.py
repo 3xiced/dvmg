@@ -40,7 +40,7 @@ class BasePattern(ABC):
         pass
 
     @abstractmethod
-    def generate_coordinates(self) -> dict[float, float]:
+    def generate_coordinates(self, x_limit: int = 1000) -> dict[float, float]:
         """
         Генерирует координаты значений лямбды для паттерна.
         """
