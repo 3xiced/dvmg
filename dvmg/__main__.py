@@ -1,9 +1,9 @@
-import multiprocessing
+from matplotlib import pyplot as plt
 from core import *
 from patterns import *
-from matplotlib import pyplot as plt
-import random
 from math import log
+import multiprocessing
+import random
 import time
 import uuid
 
