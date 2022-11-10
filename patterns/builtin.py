@@ -1,8 +1,10 @@
-from .base import BasePattern
+from .base import PatternBase
+from typing import Optional
 import numpy as np
+import random
 
 
-class Sigmoid(BasePattern):
+class Sigmoid(PatternBase):
     """
     Паттерн сигмоиды
              __________
@@ -47,7 +49,7 @@ class Sigmoid(BasePattern):
     def __init__(self, gap_y_bottom: float = 0.05, gap_y_top: float = 0.8,
                  anomaly_begin_at_x: float = 98, anomaly_width: float = 2,
                  anomaly_height: float = 0.6, min_x: float = 130, min_y: float = 0.01,
-                 min_end_x: float = 250) -> None:
+                 min_end_x: float = 250, x_limit: int = 1000, is_reversed: bool = False) -> None:
         self.__gap_y_bottom = gap_y_bottom
         self.__gap_y_top = gap_y_top - gap_y_bottom
         self.__anomaly_begin_at_x = anomaly_begin_at_x
@@ -56,11 +58,13 @@ class Sigmoid(BasePattern):
         self.__min_x = min_x
         self.__min_y = min_y
         self.__min_end_x = min_end_x
+        self.__x_limit = x_limit
+        self.__is_reversed = is_reversed
 
     # TODO: #1 Сделать свои исключения
     # TODO: #8 Сделать нормальное задавание стартовых значений
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
-                            max_gap_y_bottom: float | None = None) -> None:
+                            min_end_x: float, max_gap_y_bottom: float | None = None) -> None:
         if max_gap_y_bottom is not None and max_gap_y_bottom > 1 - min_anomaly_height:
             raise Exception(
                 "Maximum bottom gap is bigger than minimum anomaly height.")
@@ -70,16 +74,21 @@ class Sigmoid(BasePattern):
         self.__gap_y_top = np.random.uniform(
             self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
         self.__anomaly_width = np.random.uniform(
-            self.__min_end_x * 0.05, self.__min_end_x * 0.3)
+            1, self.__x_limit - 2 * min_end_x - min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
-            min_x, self.__min_end_x - self.__anomaly_width)
-
+            min_x, self.__x_limit - min_end_x - 2 * self.__anomaly_width)
+        self.__is_reversed = bool(np.random.randint(2))
     # TODO: #5 #4 Возмжность наложения белого шума (дисперсия, мат. ожидание)
-    def function(self, x: float) -> float:
-        return 1 / ((1 / self.gap_y_top) + np.exp((-10 / self.anomaly_width) * (x - self.anomaly_begin_at_x - 5))) + self.gap_y_bottom
 
-    def generate_coordinates(self, x_limit: int = 1000) -> dict[float, float]:
+    def function(self, x: float) -> float:
+        return 1 / ((1 / self.gap_y_top) + np.exp((-10 / self.anomaly_width) *
+                                                  (-1 if self.__is_reversed else 1) *
+                                                  (x - self.anomaly_begin_at_x - self.anomaly_width / 2))) + self.gap_y_bottom
+
+    def generate_coordinates(self, x_limit: Optional[int] = None) -> dict[float, float]:
+        if x_limit is not None:
+            self.__x_limit = x_limit
         coordinates: dict[float, float] = dict()
-        for x in np.arange(0, x_limit, 1):
+        for x in np.arange(0, self.__x_limit, 1):
             coordinates[x] = self.function(x)
         return coordinates

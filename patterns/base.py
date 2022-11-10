@@ -1,8 +1,9 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod, abstractproperty
+from typing import Optional
 
 
-class BasePattern(ABC):
+class PatternBase(ABC):
     """
     Интферфейс паттерна определяет стандартный набор параметров шаблона и его поведение.
     """
@@ -40,13 +41,13 @@ class BasePattern(ABC):
         pass
 
     @abstractmethod
-    def generate_coordinates(self, x_limit: int = 1000) -> dict[float, float]:
+    def generate_coordinates(self, x_limit: Optional[int] = None) -> dict[float, float]:
         """
         Генерирует координаты значений лямбды для паттерна.
         """
 
     @abstractmethod
-    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float, max_gap_y_bottom: float | None = None) -> None:
+    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float, min_end_x: float, max_gap_y_bottom: float | None = None) -> None:
         """
         Задает случайные gap_y_top, gap_y_bottom, anomaly_begin_at_x, anomaly_width.
         """

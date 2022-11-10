@@ -1,11 +1,11 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from patterns import BasePattern
+from typing import Optional
 
 
 class GeneratorWorkerBase(ABC):
     """
-    Интферфейс издателя объявляет набор методов для управлениями подписчиками.
+    Интферфейс генератора объявляет набор методов для управлениями подписчиками.
     """
 
     @abstractmethod
@@ -23,16 +23,24 @@ class GeneratorWorkerBase(ABC):
         pass
 
     @abstractmethod
-    def notify(self, coordinates: dict) -> None:
+    def notify(self, coordinates: dict[float, float]) -> None:
         """
         Уведомляет всех наблюдателей о событии.
         """
         pass
 
     @abstractmethod
-    def set_pattern(self, pattern: BasePattern) -> None:
+    def run(self, min_x: Optional[float] = None, min_y: Optional[float] = None, min_anomaly_height: Optional[float] = None,
+            min_end_x: Optional[float] = None, max_gap_y_bottom: Optional[float] = None) -> None:
         """
-        Устанавливает паттерн для использования
+        Запускает расчет координат
+        """
+        pass
+
+    @abstractmethod
+    def run_mp(self, calls) -> None:
+        """
+        Поддержка многопоточности
         """
         pass
 
@@ -46,6 +54,6 @@ class ObserverBase(ABC):
     @abstractmethod
     def onNewData(self, coordinates: dict[float, float]) -> None:
         """
-        Получить обновление от субъекта.
+        Получить обновление от генератора.
         """
         pass

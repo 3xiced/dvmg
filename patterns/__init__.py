@@ -1,2 +1,2 @@
 from .builtin import Sigmoid
-from .base import BasePattern
+from .base import PatternBase
