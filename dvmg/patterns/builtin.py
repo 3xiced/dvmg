@@ -1,7 +1,6 @@
 from .base import PatternBase
 from typing import Optional
 import numpy as np
-import random
 
 
 class Sigmoid(PatternBase):
