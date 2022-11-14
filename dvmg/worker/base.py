@@ -9,21 +9,21 @@ class GeneratorWorkerBase(ABC):
     """
 
     @abstractmethod
-    def attach(self, observer: ObserverBase) -> None:
+    def attach(self, observer: WorkerObserverBase) -> None:
         """
         Присоединяет наблюдателя к издателю.
         """
         pass
 
     @abstractmethod
-    def detach(self, observer: ObserverBase) -> None:
+    def detach(self, observer: WorkerObserverBase) -> None:
         """
         Отсоединяет наблюдателя от издателя.
         """
         pass
 
     @abstractmethod
-    def notify(self, coordinates: dict[float, float]) -> None:
+    def notify(self, coordinates: dict[float, float], processed_coordinates: list[float]) -> None:
         """
         Уведомляет всех наблюдателей о событии.
         """
@@ -31,7 +31,7 @@ class GeneratorWorkerBase(ABC):
 
     @abstractmethod
     def run(self, min_x: Optional[float] = None, min_y: Optional[float] = None, min_anomaly_height: Optional[float] = None,
-            min_end_x: Optional[float] = None, max_gap_y_bottom: Optional[float] = None) -> None:
+            min_end_x: Optional[float] = None, max_gap_y_bottom: Optional[float] = None, x_limit: Optional[int] = None) -> None:
         """
         Запускает расчет координат
         """
@@ -45,15 +45,15 @@ class GeneratorWorkerBase(ABC):
         pass
 
 
-class ObserverBase(ABC):
+class WorkerObserverBase(ABC):
     """
-    Интерфейс Наблюдателя объявляет метод уведомления, который издатели
-    используют для оповещения своих подписчиков.
+    Интерфейс Наблюдателя объявляет метод уведомления, который воркер
+    использует для оповещения своих подписчиков.
     """
 
     @abstractmethod
-    def onNewData(self, coordinates: dict[float, float]) -> None:
+    def onNewData(self, coordinates: dict[float, float], processed_coordinates: list[float]) -> None:
         """
-        Получить обновление от генератора.
+        Получает сырые координаты и уже построенные по ним случайные события и делает с ними необходимые операции
         """
         pass

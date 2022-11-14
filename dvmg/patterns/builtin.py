@@ -1,4 +1,5 @@
 from .base import PatternBase
+
 from typing import Optional
 import numpy as np
 
@@ -61,9 +62,9 @@ class Sigmoid(PatternBase):
         self.__is_reversed = is_reversed
 
     # TODO: #1 Сделать свои исключения
-    # TODO: #8 Сделать нормальное задавание стартовых значений
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
-                            min_end_x: float, max_gap_y_bottom: float | None = None) -> None:
+                            min_end_x: float, x_limit: Optional[int], max_gap_y_bottom: Optional[float] = None) -> None:
+        self.__x_limit = x_limit if x_limit is not None else self.__x_limit
         if max_gap_y_bottom is not None and max_gap_y_bottom > 1 - min_anomaly_height:
             raise Exception(
                 "Maximum bottom gap is bigger than minimum anomaly height.")
@@ -77,8 +78,10 @@ class Sigmoid(PatternBase):
         self.__anomaly_begin_at_x = np.random.uniform(
             min_x, self.__x_limit - min_end_x - 2 * self.__anomaly_width)
         self.__is_reversed = bool(np.random.randint(2))
-    # TODO: #5 #4 Возмжность наложения белого шума (дисперсия, мат. ожидание)
+        print(min_x, min_end_x, self.__x_limit,
+              self.__anomaly_width, self.__anomaly_begin_at_x)
 
+    # TODO: #5 #4 Возмжность наложения белого шума (дисперсия, мат. ожидание)
     def function(self, x: float) -> float:
         return 1 / ((1 / self.gap_y_top) + np.exp((-10 / self.anomaly_width) *
                                                   (-1 if self.__is_reversed else 1) *

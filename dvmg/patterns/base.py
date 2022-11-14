@@ -47,7 +47,7 @@ class PatternBase(ABC):
         """
 
     @abstractmethod
-    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float, min_end_x: float, max_gap_y_bottom: float | None = None) -> None:
+    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float, min_end_x: float, x_limit: Optional[int], max_gap_y_bottom: Optional[float] = None) -> None:
         """
         Задает случайные gap_y_top, gap_y_bottom, anomaly_begin_at_x, anomaly_width.
         """
