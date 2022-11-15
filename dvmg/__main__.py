@@ -7,14 +7,12 @@ import multiprocessing
 import time
 import uuid
 
-# XXX: ОТДЕЛЬНЫЙ КОНФИГ
-TO_GENERATE = 5000
-BORDER = 50000
-DEVIDER = 15
-INTERVAL_LENGTH = BORDER / DEVIDER
-
 
 class Renderer(WorkerObserverBase):
+
+    def __init__(self, devider: int):
+        self.devider = devider
+
     def onNewData(self, coordinates: dict[float, float], processed_coordinates: list[float]) -> None:
         output: dict = {}
         temp = processed_coordinates[0]
@@ -28,19 +26,19 @@ class Renderer(WorkerObserverBase):
         """
         Расчет данных для построения графика изменения лямбды
         """
-
+        interval_length = max(output_keys) / self.devider
         for i in range(0, len(output_keys) - 1):
-            if output_keys[i] > (max(output_keys) // INTERVAL_LENGTH) * INTERVAL_LENGTH:
+            if output_keys[i] > (max(output_keys) // interval_length) * interval_length:
                 break
-            if output_keys[i] > interval_number * INTERVAL_LENGTH and \
-                    output_keys[i] <= interval_number * INTERVAL_LENGTH + INTERVAL_LENGTH:
+            if output_keys[i] > interval_number * interval_length and \
+                    output_keys[i] <= interval_number * interval_length + interval_length:
                 to_hist += [interval_number]
             else:
                 interval_number += 1
                 checker = False
                 while not checker:
-                    if output_keys[i] > interval_number * INTERVAL_LENGTH and \
-                            output_keys[i] <= interval_number * INTERVAL_LENGTH + INTERVAL_LENGTH:
+                    if output_keys[i] > interval_number * interval_length and \
+                            output_keys[i] <= interval_number * interval_length + interval_length:
                         to_hist += [interval_number]
                         checker = True
                         break
@@ -80,18 +78,21 @@ class Renderer(WorkerObserverBase):
         plt.savefig(f'images/events/{_uuid}.png')
 
 
-generatorWorker = GeneratorWorker(1000, 0.01, 0.4, 1000, 0.05, TO_GENERATE)
-pattern = Sigmoid(min_end_x=TO_GENERATE)
-observer = Renderer()
-processor = ExponentialProcessor()
-generatorWorker.set_pattern(pattern)
-generatorWorker.set_processor(processor)
-generatorWorker.attach(observer)
+settings = Settings(
+    to_generate=1000, min_x=200, min_y=0.01, min_anomaly_height=0.4,
+    min_end_x=200, x_limit=1000, max_gap_y_bottom=0.05)
+
+generatorWorker = GeneratorWorker(Settings(
+    to_generate=1000, min_x=200, min_y=0.01, min_anomaly_height=0.4,
+    min_end_x=200, x_limit=1000, max_gap_y_bottom=0.05
+), Sigmoid(), ExponentialProcessor())
+
+generatorWorker.attach(Renderer(15))
 
 if __name__ == '__main__':
     start = time.perf_counter()
     pool = multiprocessing.Pool(processes=16)
-    processed_value = pool.map(generatorWorker.run_mp, range(5))
+    processed_value = pool.map(generatorWorker.run_mp, range(100))
     pool.close()
     pool.join()
     finish = time.perf_counter()

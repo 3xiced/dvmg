@@ -14,82 +14,141 @@ class Sigmoid(PatternBase):
     """
 
     @property
-    def gap_y_bottom(self):
+    def gap_y_bottom(self) -> float:
         return self.__gap_y_bottom
 
+    @gap_y_bottom.setter
+    def gap_y_bottom(self, value: float) -> None:
+        self.__gap_y_bottom = value
+
     @property
-    def gap_y_top(self):
+    def gap_y_top(self) -> float:
         return self.__gap_y_top
 
+    @gap_y_top.setter
+    def gap_y_top(self, value: float) -> None:
+        self.__gap_y_top = value
+
     @property
-    def anomaly_begin_at_x(self):
+    def anomaly_begin_at_x(self) -> float:
         return self.__anomaly_begin_at_x
 
+    @anomaly_begin_at_x.setter
+    def anomaly_begin_at_x(self, value: float) -> None:
+        self.__anomaly_begin_at_x = value
+
     @property
-    def anomaly_width(self):
+    def anomaly_width(self) -> float:
         return self.__anomaly_width
 
+    @anomaly_width.setter
+    def anomaly_width(self, value: float) -> None:
+        self.__anomaly_width = value
+
     @property
-    def anomaly_height(self):
+    def anomaly_height(self) -> float:
         return self.__anomaly_height
 
+    @anomaly_height.setter
+    def anomaly_height(self, value: float) -> None:
+        self.__anomaly_height = value
+
     @property
-    def min_x(self):
+    def min_x(self) -> float:
         return self.__min_x
 
+    @min_x.setter
+    def min_x(self, value: float) -> None:
+        self.__min_x = value
+
     @property
-    def min_y(self):
+    def min_y(self) -> float:
         return self.__min_y
 
+    @min_y.setter
+    def min_y(self, value: float) -> None:
+        self.__min_y = value
+
     @property
-    def min_end_x(self):
+    def min_end_x(self) -> float:
         return self.__min_end_x
 
-    # TODO: #7 Перегрузить __init__
-    def __init__(self, gap_y_bottom: float = 0.05, gap_y_top: float = 0.8,
-                 anomaly_begin_at_x: float = 98, anomaly_width: float = 2,
-                 anomaly_height: float = 0.6, min_x: float = 130, min_y: float = 0.01,
-                 min_end_x: float = 250, x_limit: int = 1000, is_reversed: bool = False) -> None:
-        self.__gap_y_bottom = gap_y_bottom
-        self.__gap_y_top = gap_y_top - gap_y_bottom
-        self.__anomaly_begin_at_x = anomaly_begin_at_x
-        self.__anomaly_width = anomaly_width
-        self.__anomaly_height = anomaly_height
+    @min_end_x.setter
+    def min_end_x(self, value: float) -> None:
+        self.__min_end_x = value
+
+    @property
+    def x_limit(self) -> float:
+        return self.__min_end_x
+
+    @x_limit.setter
+    def x_limit(self, value: float) -> None:
+        self.__x_limit = value
+
+    @property
+    def is_reversed(self) -> bool:
+        return self.__is_reversed
+
+    @is_reversed.setter
+    def is_reversed(self, value: bool) -> None:
+        self.__is_reversed = value
+
+    def __init__(self, gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
+                 anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
+                 anomaly_height: Optional[float] = None, min_x: Optional[float] = None,
+                 min_y: Optional[float] = None, min_end_x: Optional[float] = None,
+                 x_limit: Optional[int] = None, is_reversed: Optional[bool] = None) -> None:
+        if gap_y_bottom is not None:
+            self.__gap_y_bottom = gap_y_bottom
+        if gap_y_top is not None and gap_y_bottom is not None:
+            self.__gap_y_top = gap_y_top - gap_y_bottom
+        if anomaly_begin_at_x is not None:
+            self.__anomaly_begin_at_x = anomaly_begin_at_x
+        if anomaly_width is not None:
+            self.__anomaly_width = anomaly_width
+        if anomaly_height is not None:
+            self.__anomaly_height = anomaly_height
+        if min_x is not None:
+            self.__min_x = min_x
+        if min_y is not None:
+            self.__min_y = min_y
+        if min_end_x is not None:
+            self.__min_end_x = min_end_x
+        if x_limit is not None:
+            self.__x_limit = x_limit
+        if is_reversed is not None:
+            self.__is_reversed = is_reversed
+
+    # TODO: #1 Сделать свои исключения
+    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
+                            min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
+        if max_gap_y_bottom is not None and max_gap_y_bottom > 1 - min_anomaly_height:
+            raise RuntimeError(
+                "Maximum bottom gap is bigger than minimum anomaly height.")
+
         self.__min_x = min_x
         self.__min_y = min_y
         self.__min_end_x = min_end_x
         self.__x_limit = x_limit
-        self.__is_reversed = is_reversed
-
-    # TODO: #1 Сделать свои исключения
-    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
-                            min_end_x: float, x_limit: Optional[int], max_gap_y_bottom: Optional[float] = None) -> None:
-        self.__x_limit = x_limit if x_limit is not None else self.__x_limit
-        if max_gap_y_bottom is not None and max_gap_y_bottom > 1 - min_anomaly_height:
-            raise Exception(
-                "Maximum bottom gap is bigger than minimum anomaly height.")
         self.__gap_y_bottom = np.random.uniform(
-            min_y, 1 - min_anomaly_height) if max_gap_y_bottom is None else np.random.uniform(
-                min_y, max_gap_y_bottom)
+            self.__min_y, 1 - min_anomaly_height) if max_gap_y_bottom is None else np.random.uniform(
+                self.__min_y, max_gap_y_bottom)
         self.__gap_y_top = np.random.uniform(
             self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
         self.__anomaly_width = np.random.uniform(
-            1, self.__x_limit - 2 * min_end_x - min_x)
+            1, self.__x_limit - 2 * self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
-            min_x, self.__x_limit - min_end_x - 2 * self.__anomaly_width)
+            self.__min_x, self.__x_limit - self.__min_end_x - 2 * self.__anomaly_width)
         self.__is_reversed = bool(np.random.randint(2))
-        print(min_x, min_end_x, self.__x_limit,
-              self.__anomaly_width, self.__anomaly_begin_at_x)
 
     # TODO: #5 #4 Возмжность наложения белого шума (дисперсия, мат. ожидание)
-    def function(self, x: float) -> float:
-        return 1 / ((1 / self.gap_y_top) + np.exp((-10 / self.anomaly_width) *
-                                                  (-1 if self.__is_reversed else 1) *
-                                                  (x - self.anomaly_begin_at_x - self.anomaly_width / 2))) + self.gap_y_bottom
 
-    def generate_coordinates(self, x_limit: Optional[int] = None) -> dict[float, float]:
-        if x_limit is not None:
-            self.__x_limit = x_limit
+    def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
+        return 1 / ((1 / self.__gap_y_top) + np.exp((-10 / self.__anomaly_width) *
+                                                    (-1 if self.__is_reversed else 1) *
+                                                    (x - self.__anomaly_begin_at_x - self.__anomaly_width / 2))) + self.__gap_y_bottom
+
+    def generate_coordinates(self) -> dict[float, float]:
         coordinates: dict[float, float] = dict()
         for x in np.arange(0, self.__x_limit, 1):
             coordinates[x] = self.function(x)

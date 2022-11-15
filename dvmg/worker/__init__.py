@@ -1,2 +1,2 @@
-from .base import GeneratorWorkerBase, WorkerObserverBase
-from .builtin import GeneratorWorker
+from .base import GeneratorWorkerBase, WorkerObserverBase, WorkerSettingsBase
+from .builtin import GeneratorWorker, Settings
