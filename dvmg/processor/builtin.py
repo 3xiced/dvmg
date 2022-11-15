@@ -24,8 +24,16 @@ class ExponentialProcessor(CoordinatesProcessorBase):
             self.__to_generate = to_generate
 
     def process(self, coordinates: dict[float, float]) -> list[float]:
-        """
-        Метод, расчитывающий итоговый ряд по экспоненциальному распределению
+        """Метод обработки координат, расчитывает ряд случайных событий для экспоненциального закона распределения
+
+        Args:
+            coordinates (dict[float, float]): координата x к y(значение от 0 до 1)
+
+        Raises:
+            RuntimeError: вызывается в случае, если to_generate не установлен (равен None)
+
+        Returns:
+            list[float]: значения x, где есть случайное событие
         """
         if self.__to_generate is None:
             raise RuntimeError(

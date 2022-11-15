@@ -18,7 +18,12 @@ class CoordinatesProcessorBase(ABC):
 
     @abstractmethod
     def process(self, coordinates: dict[float, float]) -> list[float]:
-        """
-        Обрабатывает значения лямбды
+        """Метод обработки координат, расчитывает ряд случайных событий для n-го закона распределения
+
+        Args:
+            coordinates (dict[float, float]): координата x к y(значение от 0 до 1)
+
+        Returns:
+            list[float]: значения x, где есть случайное событие
         """
         pass

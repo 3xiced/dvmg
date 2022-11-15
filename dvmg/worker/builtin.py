@@ -59,11 +59,11 @@ class Settings(WorkerSettingsBase):
         self.__max_gap_y_bottom = value
 
     @property
-    def x_limit(self) -> float:
+    def x_limit(self) -> int:
         return self.__x_limit
 
     @x_limit.setter
-    def x_limit(self, value: float) -> None:
+    def x_limit(self, value: int) -> None:
         self.__x_limit = value
 
     @property
@@ -148,18 +148,12 @@ class GeneratorWorker(GeneratorWorkerBase):
     """
 
     def notify(self, coordinates: dict[float, float], processed_coordinates: list[float]) -> None:
-        """
-        Запуск обновления в каждом подписчике.
-        """
 
         for observer in self._observers:
             observer.onNewData(coordinates, processed_coordinates)
 
     # TODO: свои исключения
     def run(self, settings: Optional[WorkerSettingsBase] = None) -> None:
-        """
-        Запуск одной итерации генерации координат
-        """
         if self.__pattern is None:
             raise RuntimeError("Pattern not given exception.")
 
@@ -177,9 +171,6 @@ class GeneratorWorker(GeneratorWorkerBase):
                 coordinates)
             self.notify(coordinates, processed_coordinates)
 
-    def run_mp(self, calls) -> None:
-        """
-        Поддержка мультипроцессинга
-        """
+    def run_mp(self, calls: int) -> None:
         print(f"Processing {calls} call")
         self.run()

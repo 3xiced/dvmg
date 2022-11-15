@@ -99,23 +99,41 @@ class PatternBase(ABC):
         ...
 
     @abstractmethod
-    def generate_coordinates(self) -> dict[float, float]:
-        """
-        Генерирует координаты значений лямбды для паттерна.
-        """
-        ...
-
-    @abstractmethod
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
-                            min_end_x: float, x_limit: float, max_gap_y_bottom: Optional[float]) -> None:
-        """
-        Задает случайные gap_y_top, gap_y_bottom, anomaly_begin_at_x, anomaly_width.
+                            min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float]) -> None:
+        """Генерирует псевдо-случайные стартовые величины сдвига функции по X, Y, степень ее сжатия и
+        ее ориентацию по Y (gap_y_bottom, gap_y_top, anomaly_width, anomaly_begin_at_x, is_reversed)
+
+        Args:
+            min_x (float): минимальное расстояние от начала оси координат по X, с которого начнется аномалия
+            min_y (float): минимальное расстояние от начала оси координат по Y (минимальное значение λ)
+            min_anomaly_height (float): минимальная высота аномалии
+            min_end_x (float): минимальное расстояние от конца координат (x_limit) до точки конца аномалии
+            x_limit (int): общая длина графика (ограничение по X)
+            max_gap_y_bottom (Optional[float]): максимальное значение по Y от начала координат, выше которого
+            будет подниматься график (не должно быть меньше, либо равно min_y)
         """
         ...
 
     @abstractmethod
-    def function(self, x: int) -> float:
+    def function(self, x: int, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
+        """Генерирует значение λ для x. При переданной дисперсии и(-ли) мат. ожидания "накладывает" белый шум
+
+        Args:
+            x (int): значение x
+            dispersion (Optional[float], optional): дисперсия (степень шума). Defaults to None.
+            expected_value (Optional[float], optional): мат. ожидание. Defaults to None.
+
+        Returns:
+            float: значение функции в точке x
         """
-        Описывает математическую функцию паттерна
+        ...
+
+    @abstractmethod
+    def generate_coordinates(self) -> dict[float, float]:
+        """Генерирует значения лямбды
+
+        Returns:
+            dict[float, float]: координата x к y(значение от 0 до 1)
         """
         ...
