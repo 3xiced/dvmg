@@ -98,6 +98,15 @@ class PatternBase(ABC):
     def is_reversed(self, value: bool) -> None:
         ...
 
+    @property
+    def coordinates(self) -> dict[float, float]:
+        ...
+
+    @coordinates.setter
+    @abstractmethod
+    def coordinates(self, value: dict[float, float]) -> None:
+        ...
+
     @abstractmethod
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
                             min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
