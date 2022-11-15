@@ -78,11 +78,11 @@ class Sigmoid(PatternBase):
         self.__min_end_x = value
 
     @property
-    def x_limit(self) -> float:
-        return self.__min_end_x
+    def x_limit(self) -> int:
+        return self.__x_limit
 
     @x_limit.setter
-    def x_limit(self, value: float) -> None:
+    def x_limit(self, value: int) -> None:
         self.__x_limit = value
 
     @property
@@ -147,6 +147,113 @@ class Sigmoid(PatternBase):
         return 1 / ((1 / self.__gap_y_top) + np.exp((-10 / self.__anomaly_width) *
                                                     (-1 if self.__is_reversed else 1) *
                                                     (x - self.__anomaly_begin_at_x - self.__anomaly_width / 2))) + self.__gap_y_bottom
+
+    def generate_coordinates(self) -> dict[float, float]:
+        coordinates: dict[float, float] = dict()
+        for x in np.arange(0, self.__x_limit, 1):
+            coordinates[x] = self.function(x)
+        return coordinates
+
+
+class Plain(PatternBase):
+    """
+    Паттерн ровной линии\n
+    ____________________
+    """
+
+    @property
+    def gap_y_bottom(self) -> float:
+        return self.__gap_y_bottom
+
+    @gap_y_bottom.setter
+    def gap_y_bottom(self, value: float) -> None:
+        self.__gap_y_bottom = value
+
+    @property
+    def gap_y_top(self) -> float:
+        ...
+
+    @gap_y_top.setter
+    def gap_y_top(self, value: float) -> None:
+        ...
+
+    @property
+    def anomaly_begin_at_x(self) -> float:
+        ...
+
+    @anomaly_begin_at_x.setter
+    def anomaly_begin_at_x(self, value: float) -> None:
+        ...
+
+    @property
+    def anomaly_width(self) -> float:
+        ...
+
+    @anomaly_width.setter
+    def anomaly_width(self, value: float) -> None:
+        ...
+
+    @property
+    def anomaly_height(self) -> float:
+        ...
+
+    @anomaly_height.setter
+    def anomaly_height(self, value: float) -> None:
+        ...
+
+    @property
+    def min_x(self) -> float:
+        ...
+
+    @min_x.setter
+    def min_x(self, value: float) -> None:
+        ...
+
+    @property
+    def min_y(self) -> float:
+        ...
+
+    @min_y.setter
+    def min_y(self, value: float) -> None:
+        ...
+
+    @property
+    def min_end_x(self) -> float:
+        ...
+
+    @min_end_x.setter
+    def min_end_x(self, value: float) -> None:
+        ...
+
+    @property
+    def x_limit(self) -> int:
+        return self.__x_limit
+
+    @x_limit.setter
+    def x_limit(self, value: int) -> None:
+        self.__x_limit = value
+
+    @property
+    def is_reversed(self) -> bool:
+        ...
+
+    @is_reversed.setter
+    def is_reversed(self, value: bool) -> None:
+        ...
+
+    def __init__(self, gap_y_bottom: Optional[float] = None, x_limit: Optional[int] = None) -> None:
+        if gap_y_bottom is not None:
+            self.__gap_y_bottom = gap_y_bottom
+        if x_limit is not None:
+            self.__x_limit = x_limit
+
+    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
+                            min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
+        self.__x_limit = x_limit
+        self.__gap_y_bottom = np.random.uniform(0, 1)
+
+    def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
+        return self.__gap_y_bottom
 
     def generate_coordinates(self) -> dict[float, float]:
         coordinates: dict[float, float] = dict()

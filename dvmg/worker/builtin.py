@@ -160,6 +160,9 @@ class GeneratorWorker(GeneratorWorkerBase):
         if settings is not None:
             self.__settings = settings
 
+        if self.__settings is None:
+            raise RuntimeError("Settings not given")
+
         self.__pattern.random_start_values(
             self.__settings.min_x, self.__settings.min_y, self.__settings.min_anomaly_height,
             self.__settings.min_end_x, self.__settings.x_limit, self.__settings.max_gap_y_bottom)

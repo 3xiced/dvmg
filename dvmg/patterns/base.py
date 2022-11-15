@@ -100,7 +100,7 @@ class PatternBase(ABC):
 
     @abstractmethod
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
-                            min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float]) -> None:
+                            min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
         """Генерирует псевдо-случайные стартовые величины сдвига функции по X, Y, степень ее сжатия и
         ее ориентацию по Y (gap_y_bottom, gap_y_top, anomaly_width, anomaly_begin_at_x, is_reversed)
 

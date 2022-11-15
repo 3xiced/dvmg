@@ -54,7 +54,7 @@ class Renderer(WorkerObserverBase):
         plt.rcParams["figure.figsize"] = [20, 15]
         plt.hist(to_hist)
         plt.xlabel("№ интервала")
-        plt.ylabel("кол-во событий")
+        plt.ylabel("кол-во событий, N")
         plt.savefig(f'images/histograms/{_uuid}.png')
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,17 +63,17 @@ class Renderer(WorkerObserverBase):
         plt.rcParams["figure.figsize"] = [20, 15]
         plt.plot(coordinates.keys(), coordinates.values())
         plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-        plt.xlabel("время, с")
-        plt.ylabel("λ")
+        plt.xlabel("время, t")
+        plt.ylabel("лямбда, λ")
         plt.savefig(f'images/lambdas/{_uuid}.png')
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         plt.close('all')
-        plt.rcParams["figure.figsize"] = [20, 15]
+        plt.rcParams["figure.figsize"] = [20, 2]
         plt.bar(output.keys(), output.values())  # type: ignore
         plt.yticks([1])
-        plt.xlabel("время, c")  # Как назвать? Не то
+        plt.xlabel("время, t")
         plt.ylabel("событие")
         plt.savefig(f'images/events/{_uuid}.png')
 
@@ -85,14 +85,14 @@ settings = Settings(
 generatorWorker = GeneratorWorker(Settings(
     to_generate=1000, min_x=200, min_y=0.01, min_anomaly_height=0.4,
     min_end_x=200, x_limit=1000, max_gap_y_bottom=0.05
-), Sigmoid(), ExponentialProcessor())
+), Plain(), ExponentialProcessor())
 
 generatorWorker.attach(Renderer(15))
 
 if __name__ == '__main__':
     start = time.perf_counter()
     pool = multiprocessing.Pool(processes=16)
-    processed_value = pool.map(generatorWorker.run_mp, range(100))
+    processed_value = pool.map(generatorWorker.run_mp, range(5))
     pool.close()
     pool.join()
     finish = time.perf_counter()
