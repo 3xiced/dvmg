@@ -1,12 +1,24 @@
 from .base import GeneratorWorkerBase, WorkerObserverBase, WorkerSettingsBase
-from processor import CoordinatesProcessorBase
-from patterns import PatternBase
+from ..processors import CoordinatesProcessorBase
+from ..patterns import PatternBase
 
 from typing import Optional
 
 
 class Settings(WorkerSettingsBase):
-    """Класс настроек"""
+    """Класс настроек
+
+        Args:
+            to_generate (int): так же x_limit
+            min_x (float): _description_
+            min_y (float): _description_
+            min_anomaly_height (float): _description_
+            min_end_x (float): _description_
+            x_limit (int): _description_
+            is_reversed (Optional[bool], optional): _description_. Defaults to None.
+            max_gap_y_bottom (Optional[float], optional): _description_. Defaults to None.
+            is_random (Optional[bool], optional): _description_. Defaults to None.
+    """
 
     # region Properties
 
@@ -74,12 +86,20 @@ class Settings(WorkerSettingsBase):
     def is_reversed(self, value: bool) -> None:
         self.__is_reversed = value
 
+    @property
+    def is_random(self) -> Optional[bool]:
+        return self.__is_random
+
+    @is_random.setter
+    def is_random(self, value: bool) -> None:
+        self.__is_random = value
+
     # endregion
 
     def __init__(self, to_generate: int, min_x: float,
                  min_y: float, min_anomaly_height: float,
                  min_end_x: float, x_limit: int, is_reversed: Optional[bool] = None,
-                 max_gap_y_bottom: Optional[float] = None) -> None:
+                 max_gap_y_bottom: Optional[float] = None, is_random: Optional[bool] = None) -> None:
         self.__to_generate = to_generate
         self.__min_x = min_x
         self.__min_y = min_y
@@ -88,6 +108,7 @@ class Settings(WorkerSettingsBase):
         self.__x_limit = x_limit
         self.__is_reversed = is_reversed
         self.__max_gap_y_bottom = max_gap_y_bottom
+        self.__is_random = is_random
 
 
 # TODO: #2 Логирование
@@ -153,7 +174,7 @@ class GeneratorWorker(GeneratorWorkerBase):
             observer.onNewData(coordinates, processed_coordinates)
 
     # TODO: свои исключения
-    def run(self, settings: Optional[WorkerSettingsBase] = None) -> None:
+    def run(self, settings: Optional[WorkerSettingsBase] = None) -> tuple[dict[float, float], list[float]]:
         if self.__pattern is None:
             raise RuntimeError("Pattern not given exception.")
 
@@ -161,18 +182,23 @@ class GeneratorWorker(GeneratorWorkerBase):
             self.__settings = settings
 
         if self.__settings is None:
-            raise RuntimeError("Settings not given")
+            raise RuntimeError("Settings not given.")
 
-        self.__pattern.random_start_values(
-            self.__settings.min_x, self.__settings.min_y, self.__settings.min_anomaly_height,
-            self.__settings.min_end_x, self.__settings.x_limit, self.__settings.max_gap_y_bottom)
+        if self.__coordinates_processor is None:
+            raise RuntimeError("Coordinates processor not given.")
+
+        if self.__settings.is_random is None or self.__settings.is_random == True:
+            self.__pattern.random_start_values(
+                self.__settings.min_x, self.__settings.min_y, self.__settings.min_anomaly_height,
+                self.__settings.min_end_x, self.__settings.x_limit, self.__settings.max_gap_y_bottom)
+
         coordinates = self.__pattern.generate_coordinates()
 
-        if self.__coordinates_processor is not None:
-            self.__coordinates_processor.to_generate = self.__settings.to_generate
-            processed_coordinates: list[float] = self.__coordinates_processor.process(
-                coordinates)
-            self.notify(coordinates, processed_coordinates)
+        self.__coordinates_processor.to_generate = self.__settings.to_generate
+        processed_coordinates: list[float] = self.__coordinates_processor.process(
+            coordinates)
+        self.notify(coordinates, processed_coordinates)
+        return (coordinates, processed_coordinates)
 
     def run_mp(self, calls: int) -> None:
         print(f"Processing {calls} call")

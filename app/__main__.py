@@ -1,13 +1,13 @@
-from PyQt6 import QtWidgets, QtGui, QtCore
-import sys  # We need sys so that we can pass argv to QApplication
+from PyQt6 import QtWidgets, QtCore
+import sys
 import pyqtgraph as pg
 import numpy as np
-sys.path.append("..")
 from dvmg import worker, patterns, processors
-from MainWindow import Ui_MainWindow
+from ui import Ui_MainWindow
 from accessify import private
 import inspect
-
+from collections import Counter
+import time
 pg.setConfigOptions(antialias=True)
 
 
@@ -79,16 +79,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.__graph = Graph()
 
-        # Заполнение Combo-box
         _translate = QtCore.QCoreApplication.translate
+
+        # Заполнение comboBox (patterns)
         __patterns_list: list = inspect.getmembers(
-            patterns.builtin, inspect.isclass)
+            patterns, inspect.isclass)
         self.__f_patterns_list: list = [
             ptrn for ptrn in __patterns_list if ptrn[0] != 'PatternBase']
         for i in range(len(self.__f_patterns_list)):
             name, signature = self.__f_patterns_list[i]
-            self.comboBox.addItem("", userData=signature)
-            self.comboBox.setItemText(i, _translate("MainWindow", name))
+            self.patternsComboBox.addItem("", userData=signature)
+            self.patternsComboBox.setItemText(
+                i, _translate("MainWindow", name))
+
+        # Заполнение comboBox_2 (processors)
+        __processors_list: list = inspect.getmembers(
+            processors, inspect.isclass)
+        self.__f_processors_list: list = [
+            prcs for prcs in __processors_list if prcs[0] != 'CoordinatesProcessorBase']
+        for i in range(len(self.__f_processors_list)):
+            name, signature = self.__f_processors_list[i]
+            self.processorsComboBox.addItem("", userData=signature)
+            self.processorsComboBox.setItemText(
+                i, _translate("MainWindow", name))
 
         # Настройка виджета ручного задавания лямбды
         self.lambdaChartWidget.setBackground('transparent')
@@ -101,11 +114,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         coordinates = np.column_stack(
             (x, np.array([0.5 for _ in range(len(x))])))
         self.__graph.setData(pos=coordinates, size=10, pxMode=True)
-        if self.comboBox.currentText() != 'Custom':
+        if self.patternsComboBox.currentText() != 'Custom':
             self.lambdaChartGroupBox.setEnabled(False)
             self.lambdaChartWidget.removeItem(self.__graph)
-        if self.comboBox.currentText() != 'Plain':
-            self.lambdaSlider.setEnabled(False)
+        if self.patternsComboBox.currentText() != 'Plain':
+            # self.lambdaSlider.setEnabled(False)
+            pass
+
+        # Настройка виджета отображения гистограммы
+        self.histogramChartWidget.setBackground('transparent')
+        self.histogramChartWidget.showGrid(x=True, y=True)
+        self.histogramChartWidget.plotItem.vb.setLimits(  # type: ignore
+            xMin=1, xMax=20, yMin=0)  # TODO: 14 TO CONST
 
         # Настройка виджета отображения сгенерированного потока событий
         self.generatedDataWidget.setBackground('transparent')
@@ -117,21 +137,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Подключение хендлеров
         self.generateButton.clicked.connect(
             lambda: self.generate())
-        self.comboBox.currentIndexChanged.connect(
+        self.patternsComboBox.currentIndexChanged.connect(
             self.index_changed)
 
     def generate(self) -> None:
         # Create generator instance
-        print(self.to_generateSlider.value(), self.min_xSlider.value(), self.min_ySlider.value(
-        ), self.min_anomaly_heightSlider.value(), self.max_gap_y_bottomSlider.value())
-        generatorWorker = worker.GeneratorWorker(worker.Settings(
+        settings = worker.Settings(
             to_generate=self.to_generateSlider.value(), min_x=self.min_xSlider.value(), min_y=self.min_ySlider.value() / 100,
             min_anomaly_height=self.min_anomaly_heightSlider.value() / 100, min_end_x=self.min_xSlider.value(),
-            x_limit=self.to_generateSlider.value(), max_gap_y_bottom=self.max_gap_y_bottomSlider.value() / 100
-        ), self.comboBox.currentData()(), processors.ExponentialProcessor())
+            x_limit=self.to_generateSlider.value(), max_gap_y_bottom=self.max_gap_y_bottomSlider.value() / 100, is_random=True
+        )
+        generatorWorker = worker.GeneratorWorker(
+            settings, self.patternsComboBox.currentData()(), self.processorsComboBox.currentData()())
 
         # Generate coordinates
-        _, processed_coordinates = generatorWorker.run()
+        coordinates, processed_coordinates = generatorWorker.run()
 
         # Convert coordinates to output format
         output: dict = {}
@@ -139,22 +159,55 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for i in range(0, len(processed_coordinates)):
             output[temp] = 1
             temp += processed_coordinates[i]
+
+        # Histogram
+        to_hist: list = []
+        output_keys: list = list.copy(list(output.keys()))
+        interval_number = 0
+        interval_length = max(output_keys) / 20
+        for i in range(0, len(output_keys) - 1):
+            if output_keys[i] > interval_number * interval_length and \
+                    output_keys[i] <= interval_number * interval_length + interval_length:
+                to_hist += [interval_number]
+            else:
+                interval_number += 1
+                checker = False
+                while not checker:
+                    if output_keys[i] > interval_number * interval_length and \
+                            output_keys[i] <= interval_number * interval_length + interval_length:
+                        to_hist += [interval_number]
+                        checker = True
+                        break
+                    interval_number += 1
+
+        # Plot events
         self.plot_events(list(output.keys()), list(output.values()))
+
+        # Plot lambda
+        self.lambdaChartWidget.clear()
+        self.lambdaChartWidget.plot(
+            np.array(list(coordinates.keys())), np.array(list(coordinates.values())), pen=pg.mkPen({'color': "#083ed1"}))
+
+        # Plot histogram
+        y, x = np.histogram(to_hist)
+        self.histogramChartWidget.clear()
+        self.histogramChartWidget.plot(
+            x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
 
     def index_changed(self, _) -> None:
 
-        if self.comboBox.currentText() == 'Custom':
+        if self.patternsComboBox.currentText() == 'Custom':
             self.lambdaChartGroupBox.setEnabled(True)
-            self.lambdaSlider.setEnabled(False)
+            # self.lambdaSlider.setEnabled(False)
             self.lambdaChartWidget.addItem(self.__graph)
             return
-        elif self.comboBox.currentText() == 'Plain':
+        elif self.patternsComboBox.currentText() == 'Plain':
             self.lambdaChartGroupBox.setEnabled(False)
-            self.lambdaSlider.setEnabled(True)
+            # self.lambdaSlider.setEnabled(True)
             self.lambdaChartWidget.removeItem(self.__graph)
             return
         self.lambdaChartGroupBox.setEnabled(False)
-        self.lambdaSlider.setEnabled(False)
+        # self.lambdaSlider.setEnabled(False)
         self.lambdaChartWidget.removeItem(self.__graph)
 
     @private

@@ -1,6 +1,6 @@
 from .base import CoordinatesProcessorBase
-from worker import *
-from patterns import *
+from ..worker import *
+from ..patterns import *
 
 from math import log
 from typing import Optional

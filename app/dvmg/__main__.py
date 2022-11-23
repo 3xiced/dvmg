@@ -1,12 +1,11 @@
 from worker import *
 from patterns import *
-from processor import *
+from processors import *
 
 from matplotlib import pyplot as plt
 import multiprocessing
 import time
 import uuid
-import shutil
 import os
 
 
@@ -86,10 +85,6 @@ class Renderer(WorkerObserverBase):
         plt.ylabel("событие")
         plt.savefig(f'images/{_uuid}/events.png')
 
-
-settings = Settings(
-    to_generate=1000, min_x=200, min_y=0.01, min_anomaly_height=0.4,
-    min_end_x=200, x_limit=1000, max_gap_y_bottom=0.05)
 
 generatorWorker = GeneratorWorker(Settings(
     to_generate=1000, min_x=200, min_y=0.01, min_anomaly_height=0.4,

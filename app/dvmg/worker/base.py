@@ -2,8 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from patterns import PatternBase
-from processor import CoordinatesProcessorBase
+from ..patterns import PatternBase
+from ..processors import CoordinatesProcessorBase
 
 
 class GeneratorWorkerBase(ABC):
@@ -68,8 +68,7 @@ class GeneratorWorkerBase(ABC):
         ...
 
     @abstractmethod
-    def run(self, min_x: Optional[float] = None, min_y: Optional[float] = None, min_anomaly_height: Optional[float] = None,
-            min_end_x: Optional[float] = None, max_gap_y_bottom: Optional[float] = None, x_limit: Optional[int] = None) -> None:
+    def run(self, settings: Optional[WorkerSettingsBase] = None) -> tuple[dict[float, float], list[float]]:
         """Запускает расчет координат
 
         Args:
@@ -187,4 +186,13 @@ class WorkerSettingsBase(ABC):
     @is_reversed.setter
     @abstractmethod
     def is_reversed(self, value: bool) -> None:
+        ...
+
+    @property
+    def is_random(self) -> Optional[bool]:
+        ...
+
+    @is_random.setter
+    @abstractmethod
+    def is_random(self, value: bool) -> None:
         ...

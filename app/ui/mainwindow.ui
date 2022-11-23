@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>996</width>
-    <height>626</height>
+    <width>1199</width>
+    <height>667</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+    <item row="0" column="0" colspan="2">
      <widget class="QGroupBox" name="generatedDataGroupBox">
       <property name="minimumSize">
        <size>
@@ -32,7 +32,7 @@
       <property name="title">
        <string>Сгенерированный поток событий</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="PlotWidget" name="generatedDataWidget" native="true"/>
        </item>
@@ -46,47 +46,105 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>801</width>
-        <height>371</height>
+        <width>398</width>
+        <height>512</height>
        </size>
       </property>
       <property name="title">
        <string>Ручное изменение лямбды</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="PlotWidget" name="lambdaChartWidget" native="true"/>
        </item>
       </layout>
      </widget>
     </item>
-    <item row="0" column="1" rowspan="2">
-     <widget class="QGroupBox" name="groupBox">
+    <item row="1" column="1">
+     <widget class="QGroupBox" name="histogramChartGroupBox">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>397</width>
+        <height>512</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Гистограмма</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="PlotWidget" name="histogramChartWidget" native="true"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="2" rowspan="2">
+     <widget class="QGroupBox" name="controlsGroupBox">
       <property name="maximumSize">
        <size>
-        <width>171</width>
+        <width>251</width>
         <height>16777215</height>
        </size>
       </property>
       <property name="title">
        <string>Параметры и запуск</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="patternGroupBox">
          <property name="minimumSize">
           <size>
-           <width>151</width>
-           <height>361</height>
+           <width>231</width>
+           <height>101</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>101</height>
           </size>
          </property>
          <property name="title">
-          <string>Паттерн</string>
+          <string>Паттерн и обработчик</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QComboBox" name="comboBox"/>
+           <widget class="QComboBox" name="patternsComboBox"/>
           </item>
+          <item>
+           <widget class="QComboBox" name="processorsComboBox"/>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox">
+            <property name="text">
+             <string>Случайный график</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="settingsGroupBox">
+         <property name="minimumSize">
+          <size>
+           <width>231</width>
+           <height>451</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Параметры</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QLabel" name="to_generateLabel">
             <property name="text">
@@ -227,6 +285,9 @@
           </item>
           <item>
            <widget class="QSlider" name="max_gap_y_bottomSlider">
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
             <property name="minimum">
              <number>0</number>
             </property>
@@ -257,60 +318,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="minimumSize">
-          <size>
-           <width>151</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="title">
-          <string>Обработчик</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QComboBox" name="comboBox_2"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="lambdaLabel">
-         <property name="text">
-          <string>λ = 0.01</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSlider" name="lambdaSlider">
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::TicksBelow</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="generateButton">
-         <property name="maximumSize">
-          <size>
-           <width>151</width>
-           <height>41</height>
-          </size>
-         </property>
          <property name="text">
           <string>Сгенерировать</string>
          </property>
@@ -318,12 +326,6 @@
        </item>
        <item>
         <widget class="QPushButton" name="saveButton">
-         <property name="maximumSize">
-          <size>
-           <width>151</width>
-           <height>41</height>
-          </size>
-         </property>
          <property name="text">
           <string>Сохранить</string>
          </property>
