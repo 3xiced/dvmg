@@ -22,13 +22,46 @@ class Settings(WorkerSettingsBase):
 
     # region Properties
 
+# Properties for custom generation
     @property
-    def to_generate(self) -> int:
-        return self.__to_generate
+    def gap_y_bottom(self) -> Optional[float]:
+        return self.__gap_y_bottom
 
-    @to_generate.setter
-    def to_generate(self, value: int) -> None:
-        self.__to_generate = value
+    @gap_y_bottom.setter
+    def gap_y_bottom(self, value: float) -> None:
+        self.__gap_y_bottom = value
+
+    @property
+    def gap_y_top(self) -> Optional[float]:
+        return self.__gap_y_top
+
+    @gap_y_top.setter
+    def gap_y_top(self, value: float) -> None:
+        self.__gap_y_top = value
+
+    @property
+    def anomaly_begin_at_x(self) -> Optional[float]:
+        return self.__anomaly_begin_at_x
+
+    @anomaly_begin_at_x.setter
+    def anomaly_begin_at_x(self, value: float) -> None:
+        self.__anomaly_begin_at_x = value
+
+    @property
+    def anomaly_width(self) -> Optional[float]:
+        return self.__anomaly_width
+
+    @anomaly_width.setter
+    def anomaly_width(self, value: float) -> None:
+        self.__anomaly_width = value
+
+    @property
+    def anomaly_height(self) -> Optional[float]:
+        return self.__anomaly_height
+
+    @anomaly_height.setter
+    def anomaly_height(self, value: float) -> None:
+        self.__anomaly_height = value
 
     @property
     def min_x(self) -> float:
@@ -47,28 +80,12 @@ class Settings(WorkerSettingsBase):
         self.__min_y = value
 
     @property
-    def min_anomaly_height(self) -> float:
-        return self.__min_anomaly_height
-
-    @min_anomaly_height.setter
-    def min_anomaly_height(self, value: float) -> None:
-        self.__min_anomaly_height = value
-
-    @property
     def min_end_x(self) -> float:
         return self.__min_end_x
 
     @min_end_x.setter
     def min_end_x(self, value: float) -> None:
         self.__min_end_x = value
-
-    @property
-    def max_gap_y_bottom(self) -> Optional[float]:
-        return self.__max_gap_y_bottom
-
-    @max_gap_y_bottom.setter
-    def max_gap_y_bottom(self, value: float) -> None:
-        self.__max_gap_y_bottom = value
 
     @property
     def x_limit(self) -> int:
@@ -87,6 +104,48 @@ class Settings(WorkerSettingsBase):
         self.__is_reversed = value
 
     @property
+    def custom_coordinates(self) -> Optional[dict[float, float]]:
+        return self.__custom_coordinates
+
+    @custom_coordinates.setter
+    def custom_coordinates(self, value: dict[float, float]) -> None:
+        self.__custom_coordinates = value
+
+    @property
+    def constant_lambda(self) -> Optional[float]:
+        return self.__constant_lambda
+
+    @constant_lambda.setter
+    def constant_lambda(self, value: float) -> None:
+        self.__constant_lambda = value
+
+    # Properties for random generation
+
+    @property
+    def to_generate(self) -> int:
+        return self.__to_generate
+
+    @to_generate.setter
+    def to_generate(self, value: int) -> None:
+        self.__to_generate = value
+
+    @property
+    def min_anomaly_height(self) -> float:
+        return self.__min_anomaly_height
+
+    @min_anomaly_height.setter
+    def min_anomaly_height(self, value: float) -> None:
+        self.__min_anomaly_height = value
+
+    @property
+    def max_gap_y_bottom(self) -> Optional[float]:
+        return self.__max_gap_y_bottom
+
+    @max_gap_y_bottom.setter
+    def max_gap_y_bottom(self, value: float) -> None:
+        self.__max_gap_y_bottom = value
+
+    @property
     def is_random(self) -> Optional[bool]:
         return self.__is_random
 
@@ -99,7 +158,12 @@ class Settings(WorkerSettingsBase):
     def __init__(self, to_generate: int, min_x: float,
                  min_y: float, min_anomaly_height: float,
                  min_end_x: float, x_limit: int, is_reversed: Optional[bool] = None,
-                 max_gap_y_bottom: Optional[float] = None, is_random: Optional[bool] = None) -> None:
+                 max_gap_y_bottom: Optional[float] = None, is_random: Optional[bool] = None,
+                 custom_coordinates: Optional[dict[float, float]] = None,
+                 constant_lambda: Optional[float] = None,
+                 gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
+                 anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
+                 anomaly_height: Optional[float] = None,) -> None:
         self.__to_generate = to_generate
         self.__min_x = min_x
         self.__min_y = min_y
@@ -109,6 +173,13 @@ class Settings(WorkerSettingsBase):
         self.__is_reversed = is_reversed
         self.__max_gap_y_bottom = max_gap_y_bottom
         self.__is_random = is_random
+        self.__custom_coordinates = custom_coordinates
+        self.__constant_lambda = constant_lambda
+        self.__gap_y_bottom = gap_y_bottom
+        self.__gap_y_top = gap_y_top
+        self.__anomaly_begin_at_x = anomaly_begin_at_x
+        self.__anomaly_width = anomaly_width
+        self.__anomaly_height = anomaly_height
 
 
 # TODO: #2 Логирование
@@ -186,6 +257,19 @@ class GeneratorWorker(GeneratorWorkerBase):
 
         if self.__coordinates_processor is None:
             raise RuntimeError("Coordinates processor not given.")
+
+        self.__pattern.__init__(gap_y_bottom=self.__settings.gap_y_bottom,
+                                gap_y_top=self.__settings.gap_y_top,
+                                anomaly_begin_at_x=self.__settings.anomaly_begin_at_x,
+                                anomaly_width=self.__settings.anomaly_width,
+                                anomaly_height=self.__settings.anomaly_height,
+                                min_x=self.__settings.min_x,
+                                min_y=self.__settings.min_y,
+                                min_end_x=self.__settings.min_end_x,
+                                x_limit=self.__settings.x_limit,
+                                is_reversed=self.__settings.is_reversed,
+                                coordinates=self.__settings.custom_coordinates,
+                                constant_lambda=self.__settings.constant_lambda)
 
         if self.__settings.is_random is None or self.__settings.is_random == True:
             self.__pattern.random_start_values(

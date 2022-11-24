@@ -107,6 +107,42 @@ class PatternBase(ABC):
     def coordinates(self, value: dict[float, float]) -> None:
         ...
 
+    @property
+    def constant_lambda(self) -> float:
+        ...
+
+    @constant_lambda.setter
+    @abstractmethod
+    def constant_lambda(self, value: float) -> None:
+        ...
+
+    @abstractmethod
+    def __init__(self, gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
+                 anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
+                 anomaly_height: Optional[float] = None, min_x: Optional[float] = None,
+                 min_y: Optional[float] = None, min_end_x: Optional[float] = None,
+                 x_limit: Optional[int] = None, is_reversed: Optional[bool] = None,
+                 coordinates: Optional[dict[float, float]] = None,
+                 constant_lambda: Optional[float] = None) -> None:
+        """Метод инициализации. Для генерации координат, не прибегая к использованию
+        random_start_values, необходимо вручную задать все параметры
+
+        Args:
+            gap_y_bottom (Optional[float], optional): расстояние от 0 по y. Defaults to None.
+            gap_y_top (Optional[float], optional): расстояние от 1 по y. Defaults to None.
+            anomaly_begin_at_x (Optional[float], optional): точка начала аномалии. Defaults to None.
+            anomaly_width (Optional[float], optional): ширина аномалии. Defaults to None.
+            anomaly_height (Optional[float], optional): высота аномалии. Defaults to None.
+            min_x (Optional[float], optional): минимальное расстояние по x. Defaults to None.
+            min_y (Optional[float], optional): минимальное расстояние по y. Defaults to None.
+            min_end_x (Optional[float], optional): минимальное расстояние по x с конца. Defaults to None.
+            x_limit (Optional[int], optional): всего координат. Defaults to None.
+            is_reversed (Optional[bool], optional): переворачивает функцию по оси y. Defaults to None.
+            coordinates (Optional[dict[float, float]], optional): координаты (используется в Custom pattern). Defaults to None.
+            constant_lambda (Optional[float], optional): константа (используется в Plain pattern). Defaults to None.
+        """
+        ...
+
     @abstractmethod
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
                             min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:

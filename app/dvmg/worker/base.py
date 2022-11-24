@@ -116,13 +116,50 @@ class WorkerSettingsBase(ABC):
     у дочернего класса
     """
 
+    # Properties for custom generation
     @property
-    def to_generate(self) -> int:
+    def gap_y_bottom(self) -> Optional[float]:
         ...
 
-    @to_generate.setter
+    @gap_y_bottom.setter
     @abstractmethod
-    def to_generate(self, value: int) -> None:
+    def gap_y_bottom(self, value: float) -> None:
+        ...
+
+    @property
+    def gap_y_top(self) -> Optional[float]:
+        ...
+
+    @gap_y_top.setter
+    @abstractmethod
+    def gap_y_top(self, value: float) -> None:
+        ...
+
+    @property
+    def anomaly_begin_at_x(self) -> Optional[float]:
+        ...
+
+    @anomaly_begin_at_x.setter
+    @abstractmethod
+    def anomaly_begin_at_x(self, value: float) -> None:
+        ...
+
+    @property
+    def anomaly_width(self) -> Optional[float]:
+        ...
+
+    @anomaly_width.setter
+    @abstractmethod
+    def anomaly_width(self, value: float) -> None:
+        ...
+
+    @property
+    def anomaly_height(self) -> Optional[float]:
+        ...
+
+    @anomaly_height.setter
+    @abstractmethod
+    def anomaly_height(self, value: float) -> None:
         ...
 
     @property
@@ -144,15 +181,6 @@ class WorkerSettingsBase(ABC):
         ...
 
     @property
-    def min_anomaly_height(self) -> float:
-        ...
-
-    @min_anomaly_height.setter
-    @abstractmethod
-    def min_anomaly_height(self, value: float) -> None:
-        ...
-
-    @property
     def min_end_x(self) -> float:
         ...
 
@@ -171,21 +199,59 @@ class WorkerSettingsBase(ABC):
         ...
 
     @property
-    def max_gap_y_bottom(self) -> Optional[float]:
-        ...
-
-    @max_gap_y_bottom.setter
-    @abstractmethod
-    def max_gap_y_bottom(self, value: float) -> None:
-        ...
-
-    @property
     def is_reversed(self) -> Optional[bool]:
         ...
 
     @is_reversed.setter
     @abstractmethod
     def is_reversed(self, value: bool) -> None:
+        ...
+
+    @property
+    def custom_coordinates(self) -> Optional[dict[float, float]]:
+        ...
+
+    @custom_coordinates.setter
+    @abstractmethod
+    def custom_coordinates(self, value: dict[float, float]) -> None:
+        ...
+
+    @property
+    def constant_lambda(self) -> Optional[float]:
+        ...
+
+    @constant_lambda.setter
+    @abstractmethod
+    def constant_lambda(self, value: float) -> None:
+        ...
+
+    # Properties for random generation
+
+    @property
+    def to_generate(self) -> int:
+        ...
+
+    @to_generate.setter
+    @abstractmethod
+    def to_generate(self, value: int) -> None:
+        ...
+
+    @property
+    def min_anomaly_height(self) -> float:
+        ...
+
+    @min_anomaly_height.setter
+    @abstractmethod
+    def min_anomaly_height(self, value: float) -> None:
+        ...
+
+    @property
+    def max_gap_y_bottom(self) -> Optional[float]:
+        ...
+
+    @max_gap_y_bottom.setter
+    @abstractmethod
+    def max_gap_y_bottom(self, value: float) -> None:
         ...
 
     @property

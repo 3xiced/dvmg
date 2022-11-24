@@ -155,11 +155,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def generate(self) -> None:
         # Create generator instance
-        settings = worker.Settings(
-            to_generate=self.to_generateSlider.value(), min_x=self.min_xSlider.value(), min_y=self.min_ySlider.value() / 100,
-            min_anomaly_height=self.min_anomaly_heightSlider.value() / 100, min_end_x=self.min_xSlider.value(),
-            x_limit=self.to_generateSlider.value(), max_gap_y_bottom=self.max_gap_y_bottomSlider.value() / 100, is_random=True
-        )
+        if self.patternsComboBox.currentText() == 'Custom':
+            settings = worker.Settings(0, 0, 0, 0, 0, 0, custom_coordinates={})
+        elif self.patternsComboBox.currentText() == 'Plain':
+            settings = worker.Settings(
+                0, 0, 0, 0, 0, x_limit=1000, constant_lambda=0.5)  # TODO: TO CONST
+        else:
+            settings = worker.Settings(
+                to_generate=self.to_generateSlider.value(), min_x=self.min_xSlider.value(), min_y=self.min_ySlider.value() / 100,
+                min_anomaly_height=self.min_anomaly_heightSlider.value() / 100, min_end_x=self.min_xSlider.value(),
+                x_limit=self.to_generateSlider.value(), max_gap_y_bottom=self.max_gap_y_bottomSlider.value() / 100, is_random=True
+            )
         generatorWorker = worker.GeneratorWorker(
             settings, self.patternsComboBox.currentData()(), self.processorsComboBox.currentData()())
 

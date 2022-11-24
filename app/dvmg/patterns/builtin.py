@@ -103,13 +103,23 @@ class Sigmoid(PatternBase):
     def coordinates(self, value: dict[float, float]) -> None:
         ...
 
+    @property
+    def constant_lambda(self) -> dict[float, float]:
+        ...
+
+    @constant_lambda.setter
+    def constant_lambda(self, value: dict[float, float]) -> None:
+        ...
+
     # endregion
 
     def __init__(self, gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
                  anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
                  anomaly_height: Optional[float] = None, min_x: Optional[float] = None,
                  min_y: Optional[float] = None, min_end_x: Optional[float] = None,
-                 x_limit: Optional[int] = None, is_reversed: Optional[bool] = None) -> None:
+                 x_limit: Optional[int] = None, is_reversed: Optional[bool] = None,
+                 coordinates: Optional[dict[float, float]] = None,
+                 constant_lambda: Optional[float] = None) -> None:
         if gap_y_bottom is not None:
             self.__gap_y_bottom = gap_y_bottom
         if gap_y_top is not None and gap_y_bottom is not None:
@@ -177,11 +187,11 @@ class Plain(PatternBase):
 
     @property
     def gap_y_bottom(self) -> float:
-        return self.__gap_y_bottom
+        ...
 
     @gap_y_bottom.setter
     def gap_y_bottom(self, value: float) -> None:
-        self.__gap_y_bottom = value
+        ...
 
     @property
     def gap_y_top(self) -> float:
@@ -263,21 +273,35 @@ class Plain(PatternBase):
     def coordinates(self, value: dict[float, float]) -> None:
         ...
 
+    @property
+    def constant_lambda(self) -> float:
+        return self.__constant_lambda
+
+    @constant_lambda.setter
+    def constant_lambda(self, value: float) -> None:
+        self.__constant_lambda = value
+
     # endregion
 
-    def __init__(self, gap_y_bottom: Optional[float] = None, x_limit: Optional[int] = None) -> None:
-        if gap_y_bottom is not None:
-            self.__gap_y_bottom = gap_y_bottom
+    def __init__(self, gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
+                 anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
+                 anomaly_height: Optional[float] = None, min_x: Optional[float] = None,
+                 min_y: Optional[float] = None, min_end_x: Optional[float] = None,
+                 x_limit: Optional[int] = None, is_reversed: Optional[bool] = None,
+                 coordinates: Optional[dict[float, float]] = None,
+                 constant_lambda: Optional[float] = None) -> None:
+        if constant_lambda is not None:
+            self.__constant_lambda = constant_lambda
         if x_limit is not None:
             self.__x_limit = x_limit
 
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
                             min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
         self.__x_limit = x_limit
-        self.__gap_y_bottom = np.random.uniform(0, 1)
+        self.__constant_lambda = np.random.uniform(0, 1)
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        return self.__gap_y_bottom
+        return self.__constant_lambda
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
@@ -381,9 +405,23 @@ class Custom(PatternBase):
     def coordinates(self, value: dict[float, float]) -> None:
         self.__coordinates = value
 
+    @property
+    def constant_lambda(self) -> float:
+        ...
+
+    @constant_lambda.setter
+    def constant_lambda(self, value: float) -> None:
+        ...
+
     # endregion
 
-    def __init__(self, coordinates: Optional[dict[float, float]] = None) -> None:
+    def __init__(self, gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
+                 anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
+                 anomaly_height: Optional[float] = None, min_x: Optional[float] = None,
+                 min_y: Optional[float] = None, min_end_x: Optional[float] = None,
+                 x_limit: Optional[int] = None, is_reversed: Optional[bool] = None,
+                 coordinates: Optional[dict[float, float]] = None,
+                 constant_lambda: Optional[float] = None) -> None:
         if coordinates is not None:
             self.__coordinates = coordinates
 
