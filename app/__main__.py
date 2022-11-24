@@ -32,7 +32,7 @@ class Graph(pg.GraphItem):
         pg.GraphItem.setData(self, **self.data)
 
     def mouseDragEvent(self, ev):
-        if ev.button() != QtCore.Qt.MouseButton.LeftButton:  # type: ignore
+        if ev.button() != QtCore.Qt.MouseButton.LeftButton:
             ev.ignore()
             return
         if ev.isStart():
@@ -73,9 +73,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     """Класс формы
     """
 
-    def __init__(self, *args, obj=None, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
+
+        self.DEVIDER = 20
 
         self.__graph = Graph()
 
@@ -106,26 +108,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Настройка виджета ручного задавания лямбды
         self.lambdaChartWidget.setBackground('transparent')
         self.lambdaChartWidget.showGrid(x=True, y=True)
-        self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
-            xMin=1, xMax=1000, yMin=0, yMax=1)
-        self.lambdaChartWidget.addItem(self.__graph)
-
-        x = np.linspace(1, 1000, 10)
-        coordinates = np.column_stack(
-            (x, np.array([0.5 for _ in range(len(x))])))
-        self.__graph.setData(pos=coordinates, size=10, pxMode=True)
-        if self.patternsComboBox.currentText() != 'Custom':
-            self.lambdaChartGroupBox.setEnabled(False)
-            self.lambdaChartWidget.removeItem(self.__graph)
-        if self.patternsComboBox.currentText() != 'Plain':
-            # self.lambdaSlider.setEnabled(False)
-            pass
+        if self.patternsComboBox.currentText() == 'Custom':
+            self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
+                xMin=1, xMax=1000, yMin=0, yMax=1)
+            self.lambdaChartWidget.addItem(self.__graph)
+            # Create dots             v - number of dots
+            x = np.linspace(1, 1000, 10)
+            coordinates = np.column_stack(
+                (x, np.array([0.5 for _ in range(len(x))])))
+            self.__graph.setData(pos=coordinates, size=10, pxMode=True)
+            # Disable sliders
+            self.lambdaSlider.setEnabled(False)
+            self.min_xSlider.setEnabled(False)
+            self.min_anomaly_heightSlider.setEnabled(False)
+            self.min_ySlider.setEnabled(False)
+            self.to_generateSlider.setEnabled(False)
+            self.max_gap_y_bottomSlider.setEnabled(False)
+        else:
+            self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
+                xMin=1, xMax=100000, yMin=0, yMax=1)
+            # Disable sliders
+            self.min_xSlider.setEnabled(False)
+            self.min_anomaly_heightSlider.setEnabled(False)
+            self.min_ySlider.setEnabled(False)
+            self.to_generateSlider.setEnabled(False)
+            self.max_gap_y_bottomSlider.setEnabled(False)
 
         # Настройка виджета отображения гистограммы
         self.histogramChartWidget.setBackground('transparent')
         self.histogramChartWidget.showGrid(x=True, y=True)
         self.histogramChartWidget.plotItem.vb.setLimits(  # type: ignore
-            xMin=1, xMax=20, yMin=0)  # TODO: 14 TO CONST
+            xMin=1, xMax=self.DEVIDER - 1, yMin=0)
 
         # Настройка виджета отображения сгенерированного потока событий
         self.generatedDataWidget.setBackground('transparent')
@@ -164,7 +177,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         to_hist: list = []
         output_keys: list = list.copy(list(output.keys()))
         interval_number = 0
-        interval_length = max(output_keys) / 20
+        interval_length = max(output_keys) / self.DEVIDER
         for i in range(0, len(output_keys) - 1):
             if output_keys[i] > interval_number * interval_length and \
                     output_keys[i] <= interval_number * interval_length + interval_length:
@@ -195,20 +208,59 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
 
     def index_changed(self, _) -> None:
-
         if self.patternsComboBox.currentText() == 'Custom':
-            self.lambdaChartGroupBox.setEnabled(True)
-            # self.lambdaSlider.setEnabled(False)
+            self.lambdaChartWidget.clear()
+            self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
+                xMin=1, xMax=1000, yMin=0, yMax=1)  # Change limits back to 1000 TODO: 1000 TO CONST
+            self.lambdaSlider.setEnabled(False)  # Disable lambda slider
+
+            # Add dots plane
+            self.__graph = Graph()
             self.lambdaChartWidget.addItem(self.__graph)
+            x = np.linspace(1, 1000, 10)
+            coordinates = np.column_stack(
+                (x, np.array([0.5 for _ in range(len(x))])))
+            self.__graph.setData(pos=coordinates, size=10, pxMode=True)
+
+            # Disable all sliders
+            self.min_xSlider.setEnabled(False)
+            self.min_anomaly_heightSlider.setEnabled(False)
+            self.min_ySlider.setEnabled(False)
+            self.to_generateSlider.setEnabled(False)
+            self.max_gap_y_bottomSlider.setEnabled(False)
+            self.histogramChartWidget.clear()
+            self.generatedDataWidget.clear()
             return
         elif self.patternsComboBox.currentText() == 'Plain':
-            self.lambdaChartGroupBox.setEnabled(False)
-            # self.lambdaSlider.setEnabled(True)
-            self.lambdaChartWidget.removeItem(self.__graph)
-            return
-        self.lambdaChartGroupBox.setEnabled(False)
-        # self.lambdaSlider.setEnabled(False)
-        self.lambdaChartWidget.removeItem(self.__graph)
+            self.lambdaChartWidget.clear()
+            self.lambdaChartWidget.removeItem(
+                self.__graph)  # Remove dots plane
+            self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
+                xMin=1, xMax=100000, yMin=0, yMax=1)  # Change limits to very big number
+            self.lambdaSlider.setEnabled(True)  # Enable lambda slider
+
+            # Disable sliders
+            self.min_xSlider.setEnabled(False)
+            self.min_anomaly_heightSlider.setEnabled(False)
+            self.min_ySlider.setEnabled(False)
+            self.to_generateSlider.setEnabled(False)
+            self.max_gap_y_bottomSlider.setEnabled(False)
+        else:
+            self.lambdaSlider.setEnabled(False)  # Disable lambda slider
+            self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
+                xMin=1, xMax=100000, yMin=0, yMax=1)  # Change limits to very big number
+            self.lambdaChartWidget.removeItem(
+                self.__graph)  # Remove dots plane
+
+            # Enable all sliders
+            self.min_xSlider.setEnabled(True)
+            self.min_anomaly_heightSlider.setEnabled(True)
+            self.min_ySlider.setEnabled(True)
+            self.to_generateSlider.setEnabled(True)
+            self.max_gap_y_bottomSlider.setEnabled(True)
+        self.lambdaChartWidget.clear()
+        self.histogramChartWidget.clear()
+        self.generatedDataWidget.clear()
 
     @private
     def plot_events(self, x: list[float], y: list[float]) -> None:
@@ -223,12 +275,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             name='Stems')
 
 
-def main():
+if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
     main.show()
     app.exec()
-
-
-if __name__ == '__main__':
-    main()
