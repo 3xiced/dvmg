@@ -3,6 +3,8 @@ from .base import PatternBase
 from typing import Optional
 import numpy as np
 
+from math import pi, sqrt, exp
+
 
 class Sigmoid(PatternBase):
     """
@@ -177,77 +179,76 @@ class Sigmoid(PatternBase):
         return self.__coordinates
 
 
-class Plain(PatternBase):
+class Normal(PatternBase):
     """
-    Паттерн ровной линии лямбда. Как значение лямбды используется параметр gap_y_bottom\n
-    ____________________
+    Паттерн Гаусса
     """
 
     # region Properties
 
     @property
     def gap_y_bottom(self) -> float:
-        ...
+        return self.__gap_y_bottom
 
     @gap_y_bottom.setter
     def gap_y_bottom(self, value: float) -> None:
-        ...
+        self.__gap_y_bottom = value
 
     @property
     def gap_y_top(self) -> float:
-        ...
+        return self.__gap_y_top
 
     @gap_y_top.setter
     def gap_y_top(self, value: float) -> None:
-        ...
+        self.__gap_y_top = value
 
     @property
     def anomaly_begin_at_x(self) -> float:
-        ...
+        return self.__anomaly_begin_at_x
 
     @anomaly_begin_at_x.setter
     def anomaly_begin_at_x(self, value: float) -> None:
-        ...
+        self.__anomaly_begin_at_x = value
 
     @property
     def anomaly_width(self) -> float:
-        ...
+        return self.__anomaly_width
 
     @anomaly_width.setter
     def anomaly_width(self, value: float) -> None:
-        ...
+        self.__anomaly_width = value
 
     @property
     def anomaly_height(self) -> float:
-        ...
+        return self.__anomaly_height
 
     @anomaly_height.setter
     def anomaly_height(self, value: float) -> None:
-        ...
+        self.__anomaly_height = value
 
     @property
     def min_x(self) -> float:
-        ...
+        return self.__min_x
 
     @min_x.setter
     def min_x(self, value: float) -> None:
-        ...
+        self.__min_x = value
 
     @property
     def min_y(self) -> float:
-        ...
+        return self.__min_y
 
     @min_y.setter
     def min_y(self, value: float) -> None:
-        ...
+        self.__min_y = value
 
     @property
     def min_end_x(self) -> float:
-        ...
+        return self.__min_end_x
 
     @min_end_x.setter
     def min_end_x(self, value: float) -> None:
-        ...
+        self.__min_end_x = value
 
     @property
     def x_limit(self) -> int:
@@ -259,11 +260,11 @@ class Plain(PatternBase):
 
     @property
     def is_reversed(self) -> bool:
-        ...
+        return self.__is_reversed
 
     @is_reversed.setter
     def is_reversed(self, value: bool) -> None:
-        ...
+        self.__is_reversed = value
 
     @property
     def coordinates(self) -> dict[float, float]:
@@ -274,10 +275,177 @@ class Plain(PatternBase):
         ...
 
     @property
+    def constant_lambda(self) -> dict[float, float]:
+        ...
+
+    @constant_lambda.setter
+    def constant_lambda(self, value: dict[float, float]) -> None:
+        ...
+
+    # endregion
+
+    def __init__(self, gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
+                 anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
+                 anomaly_height: Optional[float] = None, min_x: Optional[float] = None,
+                 min_y: Optional[float] = None, min_end_x: Optional[float] = None,
+                 x_limit: Optional[int] = None, is_reversed: Optional[bool] = None,
+                 coordinates: Optional[dict[float, float]] = None,
+                 constant_lambda: Optional[float] = None) -> None:
+        if gap_y_bottom is not None:
+            self.__gap_y_bottom = gap_y_bottom
+        if gap_y_top is not None and gap_y_bottom is not None:
+            self.__gap_y_top = gap_y_top - gap_y_bottom
+        if anomaly_begin_at_x is not None:
+            self.__anomaly_begin_at_x = anomaly_begin_at_x
+        if anomaly_width is not None:
+            self.__anomaly_width = anomaly_width
+        if anomaly_height is not None:
+            self.__anomaly_height = anomaly_height
+        if min_x is not None:
+            self.__min_x = min_x
+        if min_y is not None:
+            self.__min_y = min_y
+        if min_end_x is not None:
+            self.__min_end_x = min_end_x
+        if x_limit is not None:
+            self.__x_limit = x_limit
+        if is_reversed is not None:
+            self.__is_reversed = is_reversed
+
+    # TODO: #1 Сделать свои исключения
+    def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
+                            min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
+        if max_gap_y_bottom is not None and max_gap_y_bottom > 1 - min_anomaly_height:
+            raise RuntimeError(
+                "Maximum bottom gap is bigger than minimum anomaly height.")
+
+        self.__min_x = min_x
+        self.__min_y = min_y
+        self.__min_end_x = min_end_x
+        self.__x_limit = x_limit
+        self.__gap_y_bottom = np.random.uniform(
+            self.__min_y, 1 - min_anomaly_height) if max_gap_y_bottom is None else np.random.uniform(
+                self.__min_y, max_gap_y_bottom)
+        self.__gap_y_top = np.random.uniform(
+            self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
+        self.__anomaly_width = np.random.uniform(
+            1, self.__x_limit - 2 * self.__min_end_x - self.__min_x)
+        self.__anomaly_begin_at_x = np.random.uniform(
+            self.__min_x, self.__x_limit - self.__min_end_x - 2 * self.__anomaly_width)
+        self.__is_reversed = bool(np.random.randint(2))
+
+    def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
+        return (1 / 0.4 * sqrt(2 * pi)) * exp(-(1 / 2 * 0.4**2) * (x - 0)**2)
+
+    def generate_coordinates(self) -> dict[float, float]:
+        self.__coordinates: dict[float, float] = dict()
+        for x in np.arange(0, self.__x_limit, 1):
+            self.__coordinates[x] = self.function(x)
+        print(self.__coordinates)
+        return self.__coordinates
+
+
+class Plain(PatternBase):
+    """
+    Паттерн ровной линии лямбда. Как значение лямбды используется параметр gap_y_bottom\n
+    ____________________
+    """
+
+    # region Properties
+
+    @ property
+    def gap_y_bottom(self) -> float:
+        ...
+
+    @ gap_y_bottom.setter
+    def gap_y_bottom(self, value: float) -> None:
+        ...
+
+    @ property
+    def gap_y_top(self) -> float:
+        ...
+
+    @ gap_y_top.setter
+    def gap_y_top(self, value: float) -> None:
+        ...
+
+    @ property
+    def anomaly_begin_at_x(self) -> float:
+        ...
+
+    @ anomaly_begin_at_x.setter
+    def anomaly_begin_at_x(self, value: float) -> None:
+        ...
+
+    @ property
+    def anomaly_width(self) -> float:
+        ...
+
+    @ anomaly_width.setter
+    def anomaly_width(self, value: float) -> None:
+        ...
+
+    @ property
+    def anomaly_height(self) -> float:
+        ...
+
+    @ anomaly_height.setter
+    def anomaly_height(self, value: float) -> None:
+        ...
+
+    @ property
+    def min_x(self) -> float:
+        ...
+
+    @ min_x.setter
+    def min_x(self, value: float) -> None:
+        ...
+
+    @ property
+    def min_y(self) -> float:
+        ...
+
+    @ min_y.setter
+    def min_y(self, value: float) -> None:
+        ...
+
+    @ property
+    def min_end_x(self) -> float:
+        ...
+
+    @ min_end_x.setter
+    def min_end_x(self, value: float) -> None:
+        ...
+
+    @ property
+    def x_limit(self) -> int:
+        return self.__x_limit
+
+    @ x_limit.setter
+    def x_limit(self, value: int) -> None:
+        self.__x_limit = value
+
+    @ property
+    def is_reversed(self) -> bool:
+        ...
+
+    @ is_reversed.setter
+    def is_reversed(self, value: bool) -> None:
+        ...
+
+    @ property
+    def coordinates(self) -> dict[float, float]:
+        return self.__coordinates
+
+    @ coordinates.setter
+    def coordinates(self, value: dict[float, float]) -> None:
+        ...
+
+    @ property
     def constant_lambda(self) -> float:
         return self.__constant_lambda
 
-    @constant_lambda.setter
+    @ constant_lambda.setter
     def constant_lambda(self, value: float) -> None:
         self.__constant_lambda = value
 
@@ -317,99 +485,99 @@ class Custom(PatternBase):
 
     # region Properties
 
-    @property
+    @ property
     def gap_y_bottom(self) -> float:
         ...
 
-    @gap_y_bottom.setter
+    @ gap_y_bottom.setter
     def gap_y_bottom(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def gap_y_top(self) -> float:
         ...
 
-    @gap_y_top.setter
+    @ gap_y_top.setter
     def gap_y_top(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def anomaly_begin_at_x(self) -> float:
         ...
 
-    @anomaly_begin_at_x.setter
+    @ anomaly_begin_at_x.setter
     def anomaly_begin_at_x(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def anomaly_width(self) -> float:
         ...
 
-    @anomaly_width.setter
+    @ anomaly_width.setter
     def anomaly_width(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def anomaly_height(self) -> float:
         ...
 
-    @anomaly_height.setter
+    @ anomaly_height.setter
     def anomaly_height(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def min_x(self) -> float:
         ...
 
-    @min_x.setter
+    @ min_x.setter
     def min_x(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def min_y(self) -> float:
         ...
 
-    @min_y.setter
+    @ min_y.setter
     def min_y(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def min_end_x(self) -> float:
         ...
 
-    @min_end_x.setter
+    @ min_end_x.setter
     def min_end_x(self, value: float) -> None:
         ...
 
-    @property
+    @ property
     def x_limit(self) -> int:
         ...
 
-    @x_limit.setter
+    @ x_limit.setter
     def x_limit(self, value: int) -> None:
         ...
 
-    @property
+    @ property
     def is_reversed(self) -> bool:
         ...
 
-    @is_reversed.setter
+    @ is_reversed.setter
     def is_reversed(self, value: bool) -> None:
         ...
 
-    @property
+    @ property
     def coordinates(self) -> dict[float, float]:
         return self.__coordinates
 
-    @coordinates.setter
+    @ coordinates.setter
     def coordinates(self, value: dict[float, float]) -> None:
         self.__coordinates = value
 
-    @property
+    @ property
     def constant_lambda(self) -> float:
         ...
 
-    @constant_lambda.setter
+    @ constant_lambda.setter
     def constant_lambda(self, value: float) -> None:
         ...
 

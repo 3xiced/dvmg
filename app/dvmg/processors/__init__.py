@@ -1,2 +1,2 @@
 from .base import CoordinatesProcessorBase
-from .builtin import ExponentialProcessor
+from .builtin import ExponentialProcessor, GaussianProcessor
