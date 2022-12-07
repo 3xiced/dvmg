@@ -164,8 +164,8 @@ class Sigmoid(PatternBase):
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
         self.__is_reversed = bool(np.random.randint(2))
-        print(self.__min_x, self.__x_limit -
-              self.__min_end_x - self.__anomaly_width)
+        # print(self.__min_x, self.__x_limit -
+        #       self.__min_end_x - self.__anomaly_width)
 
     # TODO: #5 #4 Возмжность наложения белого шума (дисперсия, мат. ожидание)
 
@@ -177,8 +177,8 @@ class Sigmoid(PatternBase):
         self.__coordinates: dict[float, float] = dict()
         for x in np.arange(0, self.__x_limit, 1):
             self.__coordinates[x] = self.function(x)
-        print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
-              self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
+        # print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
+        #       self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
         return self.__coordinates
 
 
@@ -336,8 +336,8 @@ class SigmoidReversed(PatternBase):
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
         self.__is_reversed = bool(np.random.randint(2))
-        print(self.__min_x, self.__x_limit -
-              self.__min_end_x - self.__anomaly_width)
+        # print(self.__min_x, self.__x_limit -
+        #       self.__min_end_x - self.__anomaly_width)
 
     # TODO: #5 #4 Возмжность наложения белого шума (дисперсия, мат. ожидание)
 
@@ -349,8 +349,8 @@ class SigmoidReversed(PatternBase):
         self.__coordinates: dict[float, float] = dict()
         for x in np.arange(0, self.__x_limit, 1):
             self.__coordinates[x] = self.function(x)
-        print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
-              self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
+        # print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
+        #       self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
         return self.__coordinates
 
 
@@ -507,19 +507,19 @@ class Normal(PatternBase):
             1, self.__x_limit - 2 * self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
-        print(self.__min_x, self.__x_limit -
-              self.__min_end_x - self.__anomaly_width)
+        # print(self.__min_x, self.__x_limit -
+        #       self.__min_end_x - self.__anomaly_width)
         self.__is_reversed = bool(np.random.randint(2))
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        return self.__gap_y_bottom + ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (30 * self.__anomaly_width * 0.5**2)))
+        return self.__gap_y_bottom + ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (120 * self.__anomaly_width * 0.5**2)))
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
         for x in np.arange(0, self.__x_limit, 1):
             self.__coordinates[x] = self.function(x)
-        print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
-              self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
+        # print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
+        #       self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
         return self.__coordinates
 
 
@@ -676,19 +676,19 @@ class NormalFlipped(PatternBase):
             1, self.__x_limit - 2 * self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
-        print(self.__min_x, self.__x_limit -
-              self.__min_end_x - self.__anomaly_width)
+        # print(self.__min_x, self.__x_limit -
+        #       self.__min_end_x - self.__anomaly_width)
         self.__is_reversed = bool(np.random.randint(2))
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        return 1 + -1 * self.__gap_y_bottom - ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (30 * self.__anomaly_width * 0.5**2)))
+        return 1 + -1 * self.__gap_y_bottom - ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (120 * self.__anomaly_width * 0.5**2)))
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
         for x in np.arange(0, self.__x_limit, 1):
             self.__coordinates[x] = self.function(x)
-        print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
-              self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
+        # print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
+        #       self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
         return self.__coordinates
 
 
@@ -845,8 +845,8 @@ class LinearIncrease(PatternBase):
             1, self.__x_limit - self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
-        print(self.__min_x, self.__x_limit -
-              self.__min_end_x - self.__anomaly_width)
+        # print(self.__min_x, self.__x_limit -
+        #       self.__min_end_x - self.__anomaly_width)
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
         if x <= self.__anomaly_begin_at_x:
@@ -863,8 +863,8 @@ class LinearIncrease(PatternBase):
         self.__coordinates: dict[float, float] = dict()
         for x in np.arange(0, self.__x_limit, 1):
             self.__coordinates[x] = self.function(x)
-        print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
-              self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
+        # print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
+        #       self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
         return self.__coordinates
 
 
@@ -1021,8 +1021,8 @@ class LinearDecrease(PatternBase):
             1, self.__x_limit - self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
-        print(self.__min_x, self.__x_limit -
-              self.__min_end_x - self.__anomaly_width)
+        # print(self.__min_x, self.__x_limit -
+        #       self.__min_end_x - self.__anomaly_width)
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
         if x <= self.__anomaly_begin_at_x:
@@ -1040,8 +1040,8 @@ class LinearDecrease(PatternBase):
         self.__coordinates: dict[float, float] = dict()
         for x in np.arange(0, self.__x_limit, 1):
             self.__coordinates[x] = self.function(x)
-        print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
-              self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
+        # print(self.min_x, self.min_y, self.min_end_x, self.x_limit, self.gap_y_bottom,
+        #       self.gap_y_top, self.anomaly_width, self.anomaly_begin_at_x)
         return self.__coordinates
 
 
