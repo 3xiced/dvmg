@@ -163,7 +163,7 @@ class Settings(WorkerSettingsBase):
                  constant_lambda: Optional[float] = None,
                  gap_y_bottom: Optional[float] = None, gap_y_top: Optional[float] = None,
                  anomaly_begin_at_x: Optional[float] = None, anomaly_width: Optional[float] = None,
-                 anomaly_height: Optional[float] = None,) -> None:
+                 anomaly_height: Optional[float] = None) -> None:
         self.__to_generate = to_generate
         self.__min_x = min_x
         self.__min_y = min_y

@@ -274,24 +274,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Расчет фазовых портретов
         """
-        intervals = dict(Counter(to_hist))
-        print(intervals)
+        N = dict(Counter(to_hist))  # Номер интервала - число событий в нем
+        print(N)
         # Коэффициент, какой элемент берем
-        k = 40
+        # k = 4
+        k = 20
         delta_1: list = list()
         delta_k: list = list()
         for i in range(0, self.DEVIDER):
-            if i not in intervals:
-                intervals[i] = 0
+            if i not in N:
+                N[i] = 0
 
         """
         Формула дельта функций
         """
-        for i in range(len(intervals.keys()) - k - k):
-            x, y = (intervals[i + k + k] - intervals[i] - (intervals[i + k // 2] - intervals[i]),
-                    intervals[i + 1] - intervals[i])
-            delta_1.append(x)
-            delta_k.append(y)
+        for i in range(len(N.keys()) - k - k):
+            # x, y = ((intervals[0] - intervals[i + k // 4]) - ((intervals[len(intervals.keys()) - 1] - intervals[0]) - (
+            #     intervals[len(intervals.keys()) // 2] - (intervals[i + k] - intervals[i] - (intervals[i + k * 2] - intervals[i + k // 2])))),
+            #     (intervals[i + 2 * k] - intervals[i]) - (intervals[i + 1] - intervals[i + k] - (intervals[0] - intervals[i])))
+            y, x = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
+                    # N[0] - N[len(N) // 2] - N[len(N) - 1] - (N[i + 2 * k] - (N[len(N) - 1] - N[i + k // 2])))
+                    (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
+            delta_1.append(y)
+            delta_k.append(x)
 
         octant_counter: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]
         temp_dict: dict[float, float] = dict()
@@ -302,7 +307,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 _delta_1.remove(value)
                 break
         """
-        Расчет реконструкции фазовых портретов
+        Расчет реконструкции фазовых портретов через разбиение на октанты
         """
         for y_coord in temp_dict.keys():
             x_coord = round(temp_dict[y_coord])
@@ -355,21 +360,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Расчет квантилей по y
         """
-        print(delta_1, delta_k)
+        # print(delta_1, delta_k)
         _delta_1 = list(delta_1)
         _delta_1.sort()
         quantilies_y: list[int] = list()
         number_of_dots = math.ceil(len(_delta_1) / 8)
         temp_counter = 0
-        temp_min_value = max(_delta_1)
+        temp_min_value = min(_delta_1)
         for y_coord in _delta_1:
-            print(temp_counter, number_of_dots, y_coord, len(_delta_1))
+            # print(temp_counter, number_of_dots, y_coord, len(_delta_1))
             if temp_counter == number_of_dots:
                 quantilies_y.append(temp_min_value)
                 temp_min_value = y_coord
                 temp_counter = 0
             temp_counter += 1
-        print(quantilies_y)
+        # print(quantilies_y)
 
         """
         Расчет квантилей по x
@@ -386,7 +391,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 temp_min_value = x_coord
                 temp_counter = 0
             temp_counter += 1
-        print(quantilies_x)
+        # print(quantilies_x)
 
         # delta_1.append(intervals[i + 1] - intervals[i])
         # delta_k.append(intervals[i + k] - intervals[i])
@@ -398,8 +403,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.histogramChartWidget.plot(
         #     x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
 
-        self.phaseTraceChartWidget.clear()
-        self.reconstructChartWidget.clear()
+        # self.phaseTraceChartWidget.clear()
+        # self.reconstructChartWidget.clear()
         self.phaseTraceChartWidget.plot(
             delta_k, delta_1, size=10, symbol='o', pen=pg.mkPen({'color': "#083ed190"}))
         # self.reconstructChartWidget.plot(
@@ -472,7 +477,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 (x, np.array([0.5 for _ in range(len(x))])))  # Квази постоянная --
         elif self.customPatternComboBox.currentText() == "Линейное возрастание":
             coordinates = np.column_stack(
-                (x, np.array([i / 10 for i in range(len(x))])))  # Линейное возврастание /
+                (x, np.array([((i / 10) if i != 0 else 0.01) for i in range(len(x))])))  # Линейное возврастание /
         elif self.customPatternComboBox.currentText() == "Линейное убывание":
             coordinates = np.column_stack(
                 (x, np.array([-i / 10 + 1 for i in range(len(x))])))  # Линейное убывание \
@@ -481,7 +486,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 (x, np.array([1 / (0.5 * np.sqrt(2 * np.pi)) * np.exp(-(i - 5)**2 / (2 * 1**2)) for i in range(len(x))])))  # Всплеск по гауссу /\
         elif self.customPatternComboBox.currentText() == "Провал":
             coordinates = np.column_stack(
-                (x, np.array([(-1 / (0.5 * np.sqrt(2 * np.pi)) * np.exp(-(i - 5)**2 / (2 * 1**2))) + 1 for i in range(len(x))])))  # Провал по гауссу \/
+                (x, np.array([(-1 / (0.5 * np.sqrt(2 * np.pi)) * np.exp(-(i - 5)**2 / (2 * 1**2))) + 0.81 for i in range(len(x))])))  # Провал по гауссу \/
         elif self.customPatternComboBox.currentText() == "Сигмоида":
             coordinates = np.column_stack(
                 (x, np.array([1 / (1 + np.exp(-2 * i + 10)) for i in range(len(x))])))  # Сигмоида _/
