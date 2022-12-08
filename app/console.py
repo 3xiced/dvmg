@@ -7,6 +7,7 @@ import os
 import math
 import uuid
 import inspect
+import json
 
 
 def generate(pattern_name: str, pattern_signature: patterns.PatternBase, _uuid: str, iters: int = 2000, devider: int = 200):
@@ -22,7 +23,10 @@ def generate(pattern_name: str, pattern_signature: patterns.PatternBase, _uuid: 
     Raises:
         Exception: Если длина квантилей по x и y не совпадают выбрасывает исключение
     """
-    with open("dataset/" + _uuid + f'/{pattern_name}' + ".txt", 'x') as outfile:
+    data = {
+        pattern_name: []
+    }
+    with open("dataset/" + _uuid + f'/{pattern_name}' + ".json", 'x') as outfile:
         settings = worker.Settings(
             to_generate=1000, min_x=160, min_y=0.01,
             min_anomaly_height=0.2, min_end_x=160,
@@ -130,9 +134,24 @@ def generate(pattern_name: str, pattern_signature: patterns.PatternBase, _uuid: 
             """
             if len(quantilies_y) != len(quantilies_x):
                 raise Exception('Shitass')
-            for i in range(len(quantilies_x)):
-                outfile.write(str(quantilies_x[i]) +
-                              " " + str(quantilies_y[i]) + "\n")
+            data[pattern_name].append(dict(x=quantilies_x, y=quantilies_y))
+            json_string = json.dumps(data)
+            outfile.write(json_string)
+            # for i in range(len(quantilies_x)):
+            #     outfile.write(str(quantilies_x[i]) +
+            #                   ", " + str(quantilies_y[i]) + ",\n")
+            """
+            "sigmoid":{[
+                {                
+                    "x": [32,18,15,14,13,12,11],
+                    "y": [66,30,10,5,1,0,0]
+                },
+                {
+                    "x": [33,11,10,9,12,12,11],
+                    "y": [66,30,10,5,1,0,0]
+                }
+            ]}
+            """
 
 
 def main():
@@ -150,7 +169,7 @@ def main():
 
     for i in range(len(__f_patterns_list)):
         name, signature = __f_patterns_list[i]
-        generate(name, signature, _uuid_)
+        generate(name, signature, _uuid_, iters=50)
 
 
 if __name__ == '__main__':
