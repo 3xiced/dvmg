@@ -86,12 +86,17 @@ def generate(pattern_signature: patterns.PatternBase, devider: int = 200) -> tup
     Формула дельта функций
     """
     for i in range(len(N.keys()) - k - k):
-        # x, y = ((intervals[0] - intervals[i + k // 4]) - ((intervals[len(intervals.keys()) - 1] - intervals[0]) - (
-        #     intervals[len(intervals.keys()) // 2] - (intervals[i + k] - intervals[i] - (intervals[i + k * 2] - intervals[i + k // 2])))),
-        #     (intervals[i + 2 * k] - intervals[i]) - (intervals[i + 1] - intervals[i + k] - (intervals[0] - intervals[i])))
-        y, x = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
-                # N[0] - N[len(N) // 2] - N[len(N) - 1] - (N[i + 2 * k] - (N[len(N) - 1] - N[i + k // 2])))
-                (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
+        # y, x = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
+        #         (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
+        # x, y = ((N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (
+        #         N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k * 2] - N[i + k // 2])))),
+        #         (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i])))
+        # y, x = ((N[0] - N[len(N) - 1] - N[i]),
+        #         (N[i] - N[i + k] - N[i + k // 2]))
+        # y, x = ((N[0] - N[len(N) - 1] - N[i]),
+        #         (N[i] - N[i + k] - N[i + k // 2] - 2 * N[0] - 2 * N[1]))
+        y, x = ((N[i] - N[i + 1]),
+                (N[i] - N[i + k]))
         delta_1.append(y)
         delta_k.append(x)
 
@@ -152,7 +157,7 @@ def main():
     for i in range(len(__f_patterns_list)):
         name, signature = __f_patterns_list[i]
         print(f'Generating {name} - {signature}')
-        for _ in range(10000):
+        for _ in range(3000):
             qx, qy = generate(signature)
 
             if name not in data:

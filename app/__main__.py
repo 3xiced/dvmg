@@ -278,7 +278,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(N)
         # Коэффициент, какой элемент берем
         # k = 4
-        k = 20
+        k = 50
         delta_1: list = list()
         delta_k: list = list()
         for i in range(0, self.DEVIDER):
@@ -288,13 +288,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Формула дельта функций
         """
-        for i in range(len(N.keys()) - k - k):
-            # x, y = ((intervals[0] - intervals[i + k // 4]) - ((intervals[len(intervals.keys()) - 1] - intervals[0]) - (
-            #     intervals[len(intervals.keys()) // 2] - (intervals[i + k] - intervals[i] - (intervals[i + k * 2] - intervals[i + k // 2])))),
-            #     (intervals[i + 2 * k] - intervals[i]) - (intervals[i + 1] - intervals[i + k] - (intervals[0] - intervals[i])))
-            y, x = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
-                    # N[0] - N[len(N) // 2] - N[len(N) - 1] - (N[i + 2 * k] - (N[len(N) - 1] - N[i + k // 2])))
-                    (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
+        for i in range(len(N.keys()) - k):
+            """
+            Динамические переменные
+            """
+            # y, x = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
+            #         (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
+            # x, y = ((N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (
+            #     N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k * 2] - N[i + k // 2])))),
+            #     (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i])))
+            y, x = ((N[i] - N[i + 1]),
+                    (N[i] - N[i + k]))
             delta_1.append(y)
             delta_k.append(x)
 
