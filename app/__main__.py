@@ -3,6 +3,7 @@ from PyQt6 import QtWidgets, QtCore
 from ui import Ui_MainWindow
 from accessify import private, protected
 from collections import Counter
+from utils import *
 
 import pyqtgraph as pg
 import numpy as np
@@ -231,36 +232,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Generate coordinates
         coordinates, processed_coordinates = generatorWorker.run()
 
-        """
-        Обработка координат для вывода на графике
-        """
-        output: dict = {}
-        temp = processed_coordinates[0]
-        for i in range(0, len(processed_coordinates)):
-            output[temp] = 1
-            temp += processed_coordinates[i]
+        output = process_coordinates_to_output(processed_coordinates)
 
-        """
-        Расчет данных для гистограммы
-        """
-        to_hist: list = []
-        output_keys: list = list.copy(list(output.keys()))
-        interval_number = 0
-        interval_length = max(output_keys) / self.DEVIDER
-        for i in range(0, len(output_keys) - 1):
-            if output_keys[i] > interval_number * interval_length and \
-                    output_keys[i] <= interval_number * interval_length + interval_length:
-                to_hist += [interval_number]
-            else:
-                interval_number += 1
-                checker = False
-                while not checker:
-                    if output_keys[i] > interval_number * interval_length and \
-                            output_keys[i] <= interval_number * interval_length + interval_length:
-                        to_hist += [interval_number]
-                        checker = True
-                        break
-                    interval_number += 1
+        to_hist = process_coordinates_to_histogram(
+            list(output.keys()), self.DEVIDER)
 
         # Plot events
         self.plot_events(list(output.keys()), list(output.values()))
@@ -271,130 +246,70 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lambdaChartWidget.plot(
                 np.array(list(coordinates.keys())), np.array(list(coordinates.values())), pen=pg.mkPen({'color': "#083ed1"}))
 
-        """
-        Расчет фазовых портретов
-        """
-        N = dict(Counter(to_hist))  # Номер интервала - число событий в нем
-        print(N)
-        # Коэффициент, какой элемент берем
-        # k = 4
-        k = 50
-        delta_1: list = list()
-        delta_k: list = list()
-        for i in range(0, self.DEVIDER):
-            if i not in N:
-                N[i] = 0
+        delta_x, delta_y = compile_phase_portrait(to_hist, self.DEVIDER, 30)
 
-        """
-        Формула дельта функций
-        """
-        for i in range(len(N.keys()) - k):
-            """
-            Динамические переменные
-            """
-            # y, x = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
-            #         (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
-            # x, y = ((N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (
-            #     N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k * 2] - N[i + k // 2])))),
-            #     (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i])))
-            y, x = ((N[i] - N[i + 1]),
-                    (N[i] - N[i + k]))
-            delta_1.append(y)
-            delta_k.append(x)
+        # octant_counter: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]
+        # temp_dict: dict[float, float] = dict()
+        # _delta_1 = list(delta_1)
+        # for key in delta_k:
+        #     for value in _delta_1:
+        #         temp_dict[key] = value
+        #         _delta_1.remove(value)
+        #         break
+        # """
+        # Расчет реконструкции фазовых портретов через разбиение на октанты
+        # """
+        # for y_coord in temp_dict.keys():
+        #     x_coord = round(temp_dict[y_coord])
+        #     y_coord = round(y_coord)
+        #     if x_coord > 0 and y_coord == 0:
+        #         octant_counter[1] += 1
+        #     elif x_coord == 0 and y_coord < 0:
+        #         octant_counter[3] += 1
+        #     elif x_coord < 0 and y_coord == 0:
+        #         octant_counter[5] += 1
+        #     elif x_coord == 0 and y_coord > 0:
+        #         octant_counter[7] += 1
+        #     # 1 четверть
+        #     elif x_coord > 0 and y_coord > 0:
+        #         # 1 октант
+        #         if y_coord >= x_coord:
+        #             octant_counter[0] += 1
+        #         # 2 октант
+        #         else:
+        #             octant_counter[1] += 1
+        #     # 2 четверть
+        #     elif x_coord > 0 and y_coord < 0:
+        #         # 3 отктант
+        #         if y_coord >= -1 * x_coord:
+        #             octant_counter[2] += 1
+        #         # 4 октант
+        #         else:
+        #             octant_counter[3] += 1
+        #     # 3 четверть
+        #     elif x_coord < 0 and y_coord < 0:
+        #         # 5 октант
+        #         if y_coord <= x_coord:
+        #             octant_counter[4] += 1
+        #         # 6 октант
+        #         else:
+        #             octant_counter[5] += 1
+        #     # 4 четверть
+        #     elif x_coord < 0 and y_coord > 0:
+        #         # 7 октант
+        #         if y_coord <= -1 * x_coord:
+        #             octant_counter[6] += 1
+        #         # 8 октант
+        #         else:
+        #             octant_counter[7] += 1
+        # octant_coordinates_x: list[int] = [octant_counter[0], octant_counter[1], -
+        #                                    octant_counter[2], 0, -octant_counter[4], -octant_counter[5], -octant_counter[6], 0]
+        # octant_coordinates_y: list[int] = [octant_counter[0], 0, octant_counter[2], -
+        #                                    octant_counter[3], -octant_counter[4], 0, octant_counter[6], octant_counter[7]]
 
-        octant_counter: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]
-        temp_dict: dict[float, float] = dict()
-        _delta_1 = list(delta_1)
-        for key in delta_k:
-            for value in _delta_1:
-                temp_dict[key] = value
-                _delta_1.remove(value)
-                break
-        """
-        Расчет реконструкции фазовых портретов через разбиение на октанты
-        """
-        for y_coord in temp_dict.keys():
-            x_coord = round(temp_dict[y_coord])
-            y_coord = round(y_coord)
-            if x_coord > 0 and y_coord == 0:
-                octant_counter[1] += 1
-            elif x_coord == 0 and y_coord < 0:
-                octant_counter[3] += 1
-            elif x_coord < 0 and y_coord == 0:
-                octant_counter[5] += 1
-            elif x_coord == 0 and y_coord > 0:
-                octant_counter[7] += 1
-            # 1 четверть
-            elif x_coord > 0 and y_coord > 0:
-                # 1 октант
-                if y_coord >= x_coord:
-                    octant_counter[0] += 1
-                # 2 октант
-                else:
-                    octant_counter[1] += 1
-            # 2 четверть
-            elif x_coord > 0 and y_coord < 0:
-                # 3 отктант
-                if y_coord >= -1 * x_coord:
-                    octant_counter[2] += 1
-                # 4 октант
-                else:
-                    octant_counter[3] += 1
-            # 3 четверть
-            elif x_coord < 0 and y_coord < 0:
-                # 5 октант
-                if y_coord <= x_coord:
-                    octant_counter[4] += 1
-                # 6 октант
-                else:
-                    octant_counter[5] += 1
-            # 4 четверть
-            elif x_coord < 0 and y_coord > 0:
-                # 7 октант
-                if y_coord <= -1 * x_coord:
-                    octant_counter[6] += 1
-                # 8 октант
-                else:
-                    octant_counter[7] += 1
-        octant_coordinates_x: list[int] = [octant_counter[0], octant_counter[1], -
-                                           octant_counter[2], 0, -octant_counter[4], -octant_counter[5], -octant_counter[6], 0]
-        octant_coordinates_y: list[int] = [octant_counter[0], 0, octant_counter[2], -
-                                           octant_counter[3], -octant_counter[4], 0, octant_counter[6], octant_counter[7]]
+        quantilies_x, quantilies_y = compile_phase_reconstruction_quantile(
+            delta_x, delta_y)
 
-        """
-        Расчет квантилей по y
-        """
-        # print(delta_1, delta_k)
-        _delta_1 = list(delta_1)
-        _delta_1.sort()
-        quantilies_y: list[int] = list()
-        number_of_dots = math.ceil(len(_delta_1) / 8)
-        temp_counter = 0
-        temp_min_value = min(_delta_1)
-        for y_coord in _delta_1:
-            # print(temp_counter, number_of_dots, y_coord, len(_delta_1))
-            if temp_counter == number_of_dots:
-                quantilies_y.append(temp_min_value)
-                temp_min_value = y_coord
-                temp_counter = 0
-            temp_counter += 1
-        # print(quantilies_y)
-
-        """
-        Расчет квантилей по x
-        """
-        _delta_k = list(delta_k)
-        _delta_k.sort()
-        quantilies_x: list[int] = list()
-        number_of_dots = math.ceil(len(_delta_k) / 8)
-        temp_counter = 0
-        temp_min_value = min(_delta_k)
-        for x_coord in _delta_k:
-            if temp_counter == number_of_dots:
-                quantilies_x.append(temp_min_value)
-                temp_min_value = x_coord
-                temp_counter = 0
-            temp_counter += 1
         # print(quantilies_x)
 
         # delta_1.append(intervals[i + 1] - intervals[i])
@@ -410,7 +325,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.phaseTraceChartWidget.clear()
         # self.reconstructChartWidget.clear()
         self.phaseTraceChartWidget.plot(
-            delta_k, delta_1, size=10, symbol='o', pen=pg.mkPen({'color': "#083ed190"}))
+            delta_x, delta_y, size=10, symbol='o', pen=pg.mkPen({'color': "#083ed190"}))
         # self.reconstructChartWidget.plot(
         #     octant_coordinates_x, octant_coordinates_y, pen=pg.mkPen({'color': "#083ed190"}))
         self.reconstructChartWidget.plot(
