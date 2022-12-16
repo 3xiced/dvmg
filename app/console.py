@@ -1,6 +1,7 @@
 """Файл запуска dvmg с помощью cmd для генерации больших массивов данных"""
 
 from dvmg import worker, patterns, processors
+from utils import *
 from collections import Counter
 
 import os
@@ -37,101 +38,16 @@ def generate(pattern_signature: patterns.PatternBase, devider: int = 200) -> tup
 
     _, processed_coordinates = generatorWorker.run()
 
-    """
-    Обработка координат для вывода на графике
-    """
-    output: dict = {}
-    temp = processed_coordinates[0]
-    for i in range(0, len(processed_coordinates)):
-        output[temp] = 1
-        temp += processed_coordinates[i]
+    output = process_coordinates_to_output(processed_coordinates)
 
-    """
-    Расчет данных для гистограммы
-    """
-    to_hist: list = []
-    output_keys: list = list.copy(list(output.keys()))
-    interval_number = 0
-    interval_length = max(output_keys) / devider  # CONST
-    for i in range(0, len(output_keys) - 1):
-        if output_keys[i] > interval_number * interval_length and \
-                output_keys[i] <= interval_number * interval_length + interval_length:
-            to_hist += [interval_number]
-        else:
-            interval_number += 1
-            checker = False
-            while not checker:
-                if output_keys[i] > interval_number * interval_length and \
-                        output_keys[i] <= interval_number * interval_length + interval_length:
-                    to_hist += [interval_number]
-                    checker = True
-                    break
-                interval_number += 1
+    to_hist = process_coordinates_to_histogram(
+        list(output.keys()), devider)
 
-    """
-    Расчет фазовых портретов
-    """
-    N = dict(Counter(to_hist))  # Номер интервала - число событий в нем
-    # print(N)
-    # Коэффициент, какой элемент берем
-    # k = 4
-    k = 20
-    delta_1: list = list()
-    delta_k: list = list()
-    for i in range(0, devider):  # CONST
-        if i not in N:
-            N[i] = 0
+    delta_x, delta_y = compile_phase_portrait(
+        to_hist, devider, 30)
 
-    """
-    Формула дельта функций
-    """
-    for i in range(len(N.keys()) - k - k):
-        # y, x = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
-        #         (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
-        # x, y = ((N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (
-        #         N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k * 2] - N[i + k // 2])))),
-        #         (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i])))
-        # y, x = ((N[0] - N[len(N) - 1] - N[i]),
-        #         (N[i] - N[i + k] - N[i + k // 2]))
-        # y, x = ((N[0] - N[len(N) - 1] - N[i]),
-        #         (N[i] - N[i + k] - N[i + k // 2] - 2 * N[0] - 2 * N[1]))
-        y, x = ((N[i] - N[i + 1]),
-                (N[i] - N[i + k]))
-        delta_1.append(y)
-        delta_k.append(x)
-
-    """
-    Расчет квантилей по y
-    """
-    # print(delta_1, delta_k)
-    _delta_1 = list(delta_1)
-    _delta_1.sort()
-    quantilies_y: list[int] = list()
-    number_of_dots = math.ceil(len(_delta_1) / 8)
-    temp_counter = 0
-    temp_min_value = min(_delta_1)
-    for y_coord in _delta_1:
-        if temp_counter == number_of_dots:
-            quantilies_y.append(temp_min_value)
-            temp_min_value = y_coord
-            temp_counter = 0
-        temp_counter += 1
-
-    """
-    Расчет квантилей по x
-    """
-    _delta_k = list(delta_k)
-    _delta_k.sort()
-    quantilies_x: list[int] = list()
-    number_of_dots = math.ceil(len(_delta_k) / 8)
-    temp_counter = 0
-    temp_min_value = min(_delta_k)
-    for x_coord in _delta_k:
-        if temp_counter == number_of_dots:
-            quantilies_x.append(temp_min_value)
-            temp_min_value = x_coord
-            temp_counter = 0
-        temp_counter += 1
+    quantilies_x, quantilies_y = compile_phase_reconstruction_octante(
+        delta_x, delta_y)
 
     if len(quantilies_y) != len(quantilies_x):
         raise Exception('Shitass')

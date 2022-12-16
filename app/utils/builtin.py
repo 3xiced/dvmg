@@ -52,7 +52,7 @@ def process_coordinates_to_histogram(coordinates: list[float], devider: int) -> 
     return to_hist
 
 
-def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int) -> tuple[list[int], list[int]]:
+def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int, dynamic_equation_x: str | None = None, dynamic_equation_y: str | None = None) -> tuple[list[int], list[int]]:
     """Генерирует фазовый портрет по данным о кол-ве точек в разных интервалах
 
     Args:
@@ -84,8 +84,11 @@ def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int) -
         # x, y = ((N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (
         #     N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k * 2] - N[i + k // 2])))),
         #     (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i])))
-        x, y = ((N[i] - N[i + 1]),
-                (N[i] - N[i + k]))
+        if dynamic_equation_x is not None and dynamic_equation_y is not None:
+            x, y = eval(dynamic_equation_x), eval(dynamic_equation_y)
+        else:
+            x, y = ((N[i] - N[i + 1]),
+                    (N[i] - N[i + k]))
         delta_x.append(y)
         delta_y.append(x)
 
@@ -100,7 +103,7 @@ def compile_phase_reconstruction_quantile(x: list[int], y: list[int]) -> tuple[l
         delta_y (list[int]): y координаты фазового портрета
 
     Returns:
-        tuple[list[int], list[int]]: кортеж из координат квантилей по x, y
+        tuple[list[int], list[int]]: кортеж из координат квантилей по x, y (по 7 точек)
     """
 
     """
@@ -141,48 +144,170 @@ def compile_phase_reconstruction_quantile(x: list[int], y: list[int]) -> tuple[l
     return (quantilies_x, quantilies_y)
 
 
-def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tuple[list[int], list[int]]:
-    """Реконструирует фазовый портрет по методу создания квантилей в двумерном пространстве
+def compile_phase_reconstruction_octante(x: list[int], y: list[int]) -> tuple[list[int], list[int]]:
+    """Реконструирует фазовый портрет по методу создания октантов
 
     Args:
         delta_x (list[int]): x координаты фазового портрета
         delta_y (list[int]): y координаты фазового портрета
 
     Returns:
-        tuple[list[int], list[int]]: кортеж из координат квантилей по x, y
+        tuple[list[int], list[int]]: кортеж из координат октантов по x, y (по 8 точек)
     """
+    octant_counter: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]
 
-    """
-    Расчет квантилей по x
-    """
-    # print(delta_1, delta_k)
-    _delta_1 = list(x)
-    _delta_1.sort()
-    quantilies_y: list[int] = list()
-    number_of_dots = math.ceil(len(_delta_1) / 8)
-    temp_counter = 0
-    temp_min_value = min(_delta_1)
-    for y_coord in _delta_1:
-        if temp_counter == number_of_dots:
-            quantilies_y.append(temp_min_value)
-            temp_min_value = y_coord
-            temp_counter = 0
-        temp_counter += 1
+    # print(x, y)
+    # print(len(y))
+    for i in range(len(y)):
+        x_coord = x[i]
+        y_coord = y[i]
+        print(x_coord, y_coord)
+        # 2 октант
+        if x_coord > 0 and y_coord == 0:
+            octant_counter[1] += 1
+        # 4 октант
+        elif x_coord == 0 and y_coord < 0:
+            octant_counter[3] += 1
+        # 6 октант
+        elif x_coord < 0 and y_coord == 0:
+            octant_counter[5] += 1
+        # 8 октант
+        elif x_coord == 0 and y_coord > 0:
+            octant_counter[7] += 1
+        # 1 четверть
+        elif x_coord > 0 and y_coord > 0:
+            # 1 октант
+            if y_coord >= x_coord:
+                octant_counter[0] += 1
+            # 2 октант
+            else:
+                octant_counter[1] += 1
+        # 2 четверть
+        elif x_coord > 0 and y_coord < 0:
+            # 3 отктант
+            if y_coord >= -1 * x_coord:
+                octant_counter[2] += 1
+            # 4 октант
+            else:
+                octant_counter[3] += 1
+        # 3 четверть
+        elif x_coord < 0 and y_coord < 0:
+            # 5 октант
+            if y_coord <= x_coord:
+                octant_counter[4] += 1
+            # 6 октант
+            else:
+                octant_counter[5] += 1
+        # 4 четверть
+        elif x_coord < 0 and y_coord > 0:
+            # 7 октант
+            if y_coord <= -1 * x_coord:
+                octant_counter[6] += 1
+            # 8 октант
+            else:
+                octant_counter[7] += 1
+    octant_coordinates_x: list[int] = [octant_counter[0], octant_counter[1],
+                                       octant_counter[2], 0, -octant_counter[4], -octant_counter[5], -octant_counter[6], 0]
+    octant_coordinates_y: list[int] = [octant_counter[0], 0, -octant_counter[2], -
+                                       octant_counter[3], -octant_counter[4], 0, octant_counter[6], octant_counter[7]]
+    print(octant_coordinates_x, octant_coordinates_y)
+    return (octant_coordinates_x, octant_coordinates_y)
 
-    """
-    Расчет квантилей по y
-    """
-    _delta_k = list(y)
-    _delta_k.sort()
-    quantilies_x: list[int] = list()
-    number_of_dots = math.ceil(len(_delta_k) / 8)
-    temp_counter = 0
-    temp_min_value = min(_delta_k)
-    for x_coord in _delta_k:
-        if temp_counter == number_of_dots:
-            quantilies_x.append(temp_min_value)
-            temp_min_value = x_coord
-            temp_counter = 0
-        temp_counter += 1
 
-    return (quantilies_x, quantilies_y)
+def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tuple[list[int], list[int]]:
+    """Реконструирует фазовый портрет по методу выделения центра тяжести по октантам
+
+    Args:
+        delta_x (list[int]): x координаты фазового портрета
+        delta_y (list[int]): y координаты фазового портрета
+
+    Returns:
+        tuple[list[int], list[int]]: кортеж из координат октантов по x, y (по 8 точек)
+    """
+    octant_counter: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]
+    octant_sum: list[list[int]] = [[0, 0], [0, 0], [0, 0],
+                                   [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+
+    # print(x, y)
+    # print(len(y))
+    for i in range(len(y)):
+        x_coord = x[i]
+        y_coord = y[i]
+        print(x_coord, y_coord)
+        # 2 октант
+        if x_coord > 0 and y_coord == 0:
+            octant_counter[1] += 1
+            octant_sum[1][0] += x_coord
+            octant_sum[1][1] += y_coord
+        # 4 октант
+        elif x_coord == 0 and y_coord < 0:
+            octant_counter[3] += 1
+            octant_sum[3][0] += x_coord
+            octant_sum[3][1] += y_coord
+        # 6 октант
+        elif x_coord < 0 and y_coord == 0:
+            octant_sum[5][0] += x_coord
+            octant_sum[5][1] += y_coord
+            octant_counter[5] += 1
+        # 8 октант
+        elif x_coord == 0 and y_coord > 0:
+            octant_sum[7][0] += x_coord
+            octant_sum[7][1] += y_coord
+            octant_counter[7] += 1
+        # 1 четверть
+        elif x_coord > 0 and y_coord > 0:
+            # 1 октант
+            if y_coord >= x_coord:
+                octant_counter[0] += 1
+                octant_sum[0][0] += x_coord
+                octant_sum[0][1] += y_coord
+            # 2 октант
+            else:
+                octant_counter[1] += 1
+                octant_sum[1][0] += x_coord
+                octant_sum[1][1] += y_coord
+        # 2 четверть
+        elif x_coord > 0 and y_coord < 0:
+            # 3 отктант
+            if y_coord >= -1 * x_coord:
+                octant_counter[2] += 1
+                octant_sum[2][0] += x_coord
+                octant_sum[2][1] += y_coord
+            # 4 октант
+            else:
+                octant_counter[3] += 1
+                octant_sum[3][0] += x_coord
+                octant_sum[3][1] += y_coord
+        # 3 четверть
+        elif x_coord < 0 and y_coord < 0:
+            # 5 октант
+            if y_coord <= x_coord:
+                octant_counter[4] += 1
+                octant_sum[4][0] += x_coord
+                octant_sum[4][1] += y_coord
+            # 6 октант
+            else:
+                octant_counter[5] += 1
+                octant_sum[5][0] += x_coord
+                octant_sum[5][1] += y_coord
+        # 4 четверть
+        elif x_coord < 0 and y_coord > 0:
+            # 7 октант
+            if y_coord <= -1 * x_coord:
+                octant_counter[6] += 1
+                octant_sum[6][0] += x_coord
+                octant_sum[6][1] += y_coord
+            # 8 октант
+            else:
+                octant_counter[7] += 1
+                octant_sum[7][0] += x_coord
+                octant_sum[7][1] += y_coord
+    coordinates_x: list[int] = []
+    coordinates_y: list[int] = []
+
+    for i in range(len(octant_counter)):
+        coordinates_x.append(octant_sum[i][0] / octant_counter[i])
+        coordinates_y.append(octant_sum[i][1] / octant_counter[i])
+
+    print(coordinates_x, coordinates_y)
+    return (coordinates_x, coordinates_y)

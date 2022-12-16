@@ -246,68 +246,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lambdaChartWidget.plot(
                 np.array(list(coordinates.keys())), np.array(list(coordinates.values())), pen=pg.mkPen({'color': "#083ed1"}))
 
-        delta_x, delta_y = compile_phase_portrait(to_hist, self.DEVIDER, 30)
+        delta_x, delta_y = compile_phase_portrait(
+            to_hist, self.DEVIDER, 30, self.dynamicDamageX.text(), self.dynamicDamageY.text())
 
-        # octant_counter: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]
-        # temp_dict: dict[float, float] = dict()
-        # _delta_1 = list(delta_1)
-        # for key in delta_k:
-        #     for value in _delta_1:
-        #         temp_dict[key] = value
-        #         _delta_1.remove(value)
-        #         break
-        # """
-        # Расчет реконструкции фазовых портретов через разбиение на октанты
-        # """
-        # for y_coord in temp_dict.keys():
-        #     x_coord = round(temp_dict[y_coord])
-        #     y_coord = round(y_coord)
-        #     if x_coord > 0 and y_coord == 0:
-        #         octant_counter[1] += 1
-        #     elif x_coord == 0 and y_coord < 0:
-        #         octant_counter[3] += 1
-        #     elif x_coord < 0 and y_coord == 0:
-        #         octant_counter[5] += 1
-        #     elif x_coord == 0 and y_coord > 0:
-        #         octant_counter[7] += 1
-        #     # 1 четверть
-        #     elif x_coord > 0 and y_coord > 0:
-        #         # 1 октант
-        #         if y_coord >= x_coord:
-        #             octant_counter[0] += 1
-        #         # 2 октант
-        #         else:
-        #             octant_counter[1] += 1
-        #     # 2 четверть
-        #     elif x_coord > 0 and y_coord < 0:
-        #         # 3 отктант
-        #         if y_coord >= -1 * x_coord:
-        #             octant_counter[2] += 1
-        #         # 4 октант
-        #         else:
-        #             octant_counter[3] += 1
-        #     # 3 четверть
-        #     elif x_coord < 0 and y_coord < 0:
-        #         # 5 октант
-        #         if y_coord <= x_coord:
-        #             octant_counter[4] += 1
-        #         # 6 октант
-        #         else:
-        #             octant_counter[5] += 1
-        #     # 4 четверть
-        #     elif x_coord < 0 and y_coord > 0:
-        #         # 7 октант
-        #         if y_coord <= -1 * x_coord:
-        #             octant_counter[6] += 1
-        #         # 8 октант
-        #         else:
-        #             octant_counter[7] += 1
-        # octant_coordinates_x: list[int] = [octant_counter[0], octant_counter[1], -
-        #                                    octant_counter[2], 0, -octant_counter[4], -octant_counter[5], -octant_counter[6], 0]
-        # octant_coordinates_y: list[int] = [octant_counter[0], 0, octant_counter[2], -
-        #                                    octant_counter[3], -octant_counter[4], 0, octant_counter[6], octant_counter[7]]
-
-        quantilies_x, quantilies_y = compile_phase_reconstruction_quantile(
+        quantilies_x, quantilies_y = compile_phase_reconstruction_weight_center(
             delta_x, delta_y)
 
         # print(quantilies_x)
