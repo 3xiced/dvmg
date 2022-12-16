@@ -1,2 +1,5 @@
 matplotlib
 numpy
+accessify
+pyqt6
+pyqtgraph

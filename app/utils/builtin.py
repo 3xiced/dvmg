@@ -139,7 +139,7 @@ def compile_phase_reconstruction_quantile(x: list[int], y: list[int]) -> tuple[l
             temp_counter = 0
         temp_counter += 1
 
-    print(x, y)
+    # print(x, y)
 
     return (quantilies_x, quantilies_y)
 
@@ -161,7 +161,7 @@ def compile_phase_reconstruction_octante(x: list[int], y: list[int]) -> tuple[li
     for i in range(len(y)):
         x_coord = x[i]
         y_coord = y[i]
-        print(x_coord, y_coord)
+        # print(x_coord, y_coord)
         # 2 октант
         if x_coord > 0 and y_coord == 0:
             octant_counter[1] += 1
@@ -210,7 +210,7 @@ def compile_phase_reconstruction_octante(x: list[int], y: list[int]) -> tuple[li
                                        octant_counter[2], 0, -octant_counter[4], -octant_counter[5], -octant_counter[6], 0]
     octant_coordinates_y: list[int] = [octant_counter[0], 0, -octant_counter[2], -
                                        octant_counter[3], -octant_counter[4], 0, octant_counter[6], octant_counter[7]]
-    print(octant_coordinates_x, octant_coordinates_y)
+    # print(octant_coordinates_x, octant_coordinates_y)
     return (octant_coordinates_x, octant_coordinates_y)
 
 
@@ -233,7 +233,7 @@ def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tu
     for i in range(len(y)):
         x_coord = x[i]
         y_coord = y[i]
-        print(x_coord, y_coord)
+        # print(x_coord, y_coord)
         # 2 октант
         if x_coord > 0 and y_coord == 0:
             octant_counter[1] += 1
@@ -306,8 +306,10 @@ def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tu
     coordinates_y: list[int] = []
 
     for i in range(len(octant_counter)):
-        coordinates_x.append(octant_sum[i][0] / octant_counter[i])
-        coordinates_y.append(octant_sum[i][1] / octant_counter[i])
+        coordinates_x.append(octant_sum[i][0] / octant_counter[i]
+                             ) if octant_counter[i] != 0 else coordinates_x.append(0)
+        coordinates_y.append(octant_sum[i][1] / octant_counter[i]
+                             ) if octant_counter[i] != 0 else coordinates_y.append(0)
 
-    print(coordinates_x, coordinates_y)
+    # print(coordinates_x, coordinates_y)
     return (coordinates_x, coordinates_y)
