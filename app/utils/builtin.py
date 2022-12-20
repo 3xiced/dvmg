@@ -75,7 +75,7 @@ def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int, d
     """
     Формула дельта функций
     """
-    for i in range(len(N.keys()) - k):
+    for i in range(len(N.keys()) - k - k):
         """
         Динамические переменные
         """
@@ -87,8 +87,8 @@ def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int, d
         if dynamic_equation_x is not None and dynamic_equation_y is not None:
             x, y = eval(dynamic_equation_x), eval(dynamic_equation_y)
         else:
-            x, y = ((N[i] - N[i + 1]),
-                    (N[i] - N[i + k]))
+            x, y = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
+                    (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
         delta_x.append(y)
         delta_y.append(x)
 
