@@ -130,15 +130,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 i, _translate("MainWindow", name))
 
         # Заполнение comboBox_2 (processors)
-        __processors_list: list = inspect.getmembers(
-            processors, inspect.isclass)
-        self.__f_processors_list: list = [
-            prcs for prcs in __processors_list if prcs[0] != 'CoordinatesProcessorBase']
-        for i in range(len(self.__f_processors_list)):
-            name, signature = self.__f_processors_list[i]
-            self.processorsComboBox.addItem("", userData=signature)
-            self.processorsComboBox.setItemText(
-                i, _translate("MainWindow", name))
+        self.processorsComboBox.addItem(
+            "", userData=compile_phase_reconstruction_quantile)
+        self.processorsComboBox.setItemText(
+            0, _translate("MainWindow", "Quantile"))
+        self.processorsComboBox.addItem(
+            "", userData=compile_phase_reconstruction_weight_center)
+        self.processorsComboBox.setItemText(
+            1, _translate("MainWindow", "Weight center"))
+        self.processorsComboBox.addItem(
+            "", userData=compile_phase_reconstruction_octante)
+        self.processorsComboBox.setItemText(
+            2, _translate("MainWindow", "Octante"))
 
         # Настройка виджета ручного задавания лямбды
         self.lambdaChartWidget.setBackground('transparent')
@@ -165,6 +168,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.min_ySlider.setEnabled(False)
             self.to_generateSlider.setEnabled(False)
             self.max_gap_y_bottomSlider.setEnabled(False)
+            self.customPatternComboBox.setVisible(True)
         else:
             self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
                 xMin=0, xMax=100000, yMin=0, yMax=1)
@@ -174,6 +178,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.min_ySlider.setEnabled(False)
             self.to_generateSlider.setEnabled(False)
             self.max_gap_y_bottomSlider.setEnabled(False)
+            self.customPatternComboBox.setVisible(False)
 
         # Настройка виджета отображения фазового портрета
         self.phaseTraceChartWidget.setBackground('transparent')
@@ -199,6 +204,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.index_changed)
         self.customPatternComboBox.currentIndexChanged.connect(
             self.custom_index_changed)
+        self.saveButton.clicked.connect(self.reset)
 
     def generate(self) -> None:
         # Create generator instance
@@ -227,7 +233,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 x_limit=self.to_generateSlider.value(), max_gap_y_bottom=self.max_gap_y_bottomSlider.value() / 100, is_random=True
             )
         generatorWorker = worker.GeneratorWorker(
-            settings, self.patternsComboBox.currentData()(), self.processorsComboBox.currentData()())
+            settings, self.patternsComboBox.currentData()(), processors.ExponentialProcessor())
 
         # Generate coordinates
         coordinates, processed_coordinates = generatorWorker.run()
@@ -249,7 +255,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         delta_x, delta_y = compile_phase_portrait(
             to_hist, self.DEVIDER, 30, self.dynamicDamageX.text(), self.dynamicDamageY.text())
 
-        quantilies_x, quantilies_y = compile_phase_reconstruction_weight_center(
+        quantilies_x, quantilies_y = self.processorsComboBox.currentData()(
             delta_x, delta_y)
 
         # print(quantilies_x)
@@ -296,6 +302,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.max_gap_y_bottomSlider.setEnabled(False)
             self.phaseTraceChartWidget.clear()
             self.generatedDataWidget.clear()
+            self.customPatternComboBox.setVisible(True)
             return
         elif self.patternsComboBox.currentText() == 'Plain':
             self.lambdaChartWidget.clear()
@@ -311,6 +318,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.min_ySlider.setEnabled(False)
             self.to_generateSlider.setEnabled(False)
             self.max_gap_y_bottomSlider.setEnabled(False)
+            self.customPatternComboBox.setVisible(False)
         else:
             self.lambdaSlider.setEnabled(False)  # Disable lambda slider
             self.lambdaChartWidget.plotItem.vb.setLimits(  # type: ignore
@@ -324,6 +332,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.min_ySlider.setEnabled(True)
             self.to_generateSlider.setEnabled(True)
             self.max_gap_y_bottomSlider.setEnabled(True)
+            self.customPatternComboBox.setVisible(False)
         self.lambdaChartWidget.clear()
         self.phaseTraceChartWidget.clear()
         self.generatedDataWidget.clear()
@@ -357,6 +366,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             exit()
         self.graph.setData(pos=coordinates, size=11, pxMode=True)
+
+    def reset(self):
+        self.phaseTraceChartWidget.clear()
+        self.generatedDataWidget.clear()
+        self.lambdaChartWidget.clear()
+        self.reconstructChartWidget.clear()
 
     @ private
     def plot_events(self, x: list[float], y: list[float]) -> None:
