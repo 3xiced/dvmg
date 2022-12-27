@@ -46,7 +46,7 @@ def generate(pattern_signature: patterns.PatternBase, devider: int = 200) -> tup
     delta_x, delta_y = compile_phase_portrait(
         to_hist, devider, 30)
 
-    quantilies_x, quantilies_y = compile_phase_reconstruction_octante(
+    quantilies_x, quantilies_y = compile_phase_reconstruction_quantile(
         delta_x, delta_y)
 
     if len(quantilies_y) != len(quantilies_x):

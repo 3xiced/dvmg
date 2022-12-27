@@ -75,7 +75,7 @@ def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int, d
     """
     Формула дельта функций
     """
-    for i in range(len(N.keys()) - k - k):
+    for i in range(len(N.keys()) - k):
         """
         Динамические переменные
         """
@@ -87,8 +87,8 @@ def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int, d
         if dynamic_equation_x is not None and dynamic_equation_y is not None:
             x, y = eval(dynamic_equation_x), eval(dynamic_equation_y)
         else:
-            x, y = (N[0] - N[len(N) - 1] - 2 * N[len(N) // 2] - 2 * N[(len(N) // 2) + 1] - 2 * N[(len(N) // 2) - 1] - N[i] - N[i + k],
-                    (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i] - 2 * N[len(N) - 1])))
+            x, y = (N[k] - N[0] - N[len(N) - 1] - N[i],
+                    N[i + k] - N[len(N) // 2] - N[0] - 3 * N[len(N) - k])
         delta_x.append(y)
         delta_y.append(x)
 
@@ -116,12 +116,17 @@ def compile_phase_reconstruction_quantile(x: list[int], y: list[int]) -> tuple[l
     number_of_dots = math.ceil(len(_delta_1) / 8)
     temp_counter = 0
     temp_min_value = min(_delta_1)
+    # print(_delta_1)
     for y_coord in _delta_1:
+        # print(y_coord)
+        # print(temp_counter)
+        # print(number_of_dots)
         if temp_counter == number_of_dots:
             quantilies_y.append(temp_min_value)
             temp_min_value = y_coord
             temp_counter = 0
         temp_counter += 1
+    # print(quantilies_y)
 
     """
     Расчет квантилей по y
@@ -138,6 +143,7 @@ def compile_phase_reconstruction_quantile(x: list[int], y: list[int]) -> tuple[l
             temp_min_value = x_coord
             temp_counter = 0
         temp_counter += 1
+    # print(quantilies_x)
 
     # print(x, y)
 
@@ -214,7 +220,7 @@ def compile_phase_reconstruction_octante(x: list[int], y: list[int]) -> tuple[li
     return (octant_coordinates_x, octant_coordinates_y)
 
 
-def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tuple[list[int], list[int]]:
+def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tuple[list[float], list[float]]:
     """Реконструирует фазовый портрет по методу выделения центра тяжести по октантам
 
     Args:
@@ -302,8 +308,8 @@ def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tu
                 octant_counter[7] += 1
                 octant_sum[7][0] += x_coord
                 octant_sum[7][1] += y_coord
-    coordinates_x: list[int] = []
-    coordinates_y: list[int] = []
+    coordinates_x: list[float] = []
+    coordinates_y: list[float] = []
 
     for i in range(len(octant_counter)):
         coordinates_x.append(octant_sum[i][0] / octant_counter[i]

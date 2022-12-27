@@ -673,7 +673,7 @@ class NormalFlipped(PatternBase):
         self.__gap_y_top = np.random.uniform(
             self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
         self.__anomaly_width = np.random.uniform(
-            1, self.__x_limit - 2 * self.__min_end_x - self.__min_x)
+            self.__min_end_x // 2, self.__x_limit - 2 * self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
         # print(self.__min_x, self.__x_limit -
