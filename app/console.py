@@ -10,6 +10,10 @@ import uuid
 import inspect
 import json
 
+EQUATION_1 = (
+    '(N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k] - N[i + k // 2]))))',
+    '(N[i + k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i]))')  # sigmoid, reversed_sigmoid, normal - quantile
+
 
 def generate(pattern_signature: patterns.PatternBase, devider: int = 200) -> tuple[list[int], list[int]]:
     """Функция генерирует реконструкции фазовых портретов для всех паттернов и записывает их в файлы
