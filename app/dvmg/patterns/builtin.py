@@ -847,17 +847,19 @@ class LinearIncrease(PatternBase):
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
         # print(self.__min_x, self.__x_limit -
         #       self.__min_end_x - self.__anomaly_width)
+        # print(self.gap_y_bottom, self.gap_y_top, self.anomaly_width)
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        if x <= self.__anomaly_begin_at_x:
-            return self.gap_y_bottom
-        elif x >= self.__anomaly_begin_at_x + self.__anomaly_width:
-            return self.gap_y_top
-        else:
-            k = (self.gap_y_top - self.gap_y_bottom) / (self.anomaly_width)
-            b = self.gap_y_top - k * \
-                (self.anomaly_begin_at_x + self.anomaly_width)
-            return k * x + b
+        # if x <= self.__anomaly_begin_at_x:
+        #     return self.gap_y_bottom
+        # elif x >= self.__anomaly_begin_at_x + self.__anomaly_width:
+        #     return self.gap_y_top
+        # else:
+        # k = (self.gap_y_top - self.gap_y_bottom) / (self.anomaly_width)
+        # b = self.gap_y_top - k * \
+        #     (self.anomaly_begin_at_x + self.anomaly_width)
+        k = (self.gap_y_top - self.gap_y_bottom) / (1000)
+        return k * x + 0.0001
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
@@ -1015,8 +1017,10 @@ class LinearDecrease(PatternBase):
         self.__gap_y_bottom = np.random.uniform(
             self.__min_y, 1 - min_anomaly_height) if max_gap_y_bottom is None else np.random.uniform(
                 self.__min_y, max_gap_y_bottom)
+        # self.__gap_y_top = np.random.uniform(
+        #     self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
         self.__gap_y_top = np.random.uniform(
-            self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
+            0.99, 1) - self.__gap_y_bottom
         self.__anomaly_width = np.random.uniform(
             1, self.__x_limit - self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
@@ -1025,16 +1029,18 @@ class LinearDecrease(PatternBase):
         #       self.__min_end_x - self.__anomaly_width)
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        if x <= self.__anomaly_begin_at_x:
-            return self.gap_y_top
-        elif x >= self.__anomaly_begin_at_x + self.__anomaly_width:
-            return self.gap_y_bottom
-        else:
-            k = (self.gap_y_top - self.gap_y_bottom) / \
-                ((-1) * self.anomaly_width)
-            b = self.gap_y_bottom - k * \
-                (self.anomaly_begin_at_x + self.anomaly_width)
-            return k * x + b
+        # if x <= self.__anomaly_begin_at_x:
+        #     return self.gap_y_top
+        # elif x >= self.__anomaly_begin_at_x + self.__anomaly_width:
+        #     return self.gap_y_bottom
+        # else:
+        #     k = (self.gap_y_top - self.gap_y_bottom) / \
+        #         ((-1) * self.anomaly_width)
+        #     b = self.gap_y_bottom - k * \
+        #         (self.anomaly_begin_at_x + self.anomaly_width)
+        #     return k * x + b
+        k = (self.gap_y_top - self.gap_y_bottom) / (-1000)
+        return k * x + 0.9999
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()

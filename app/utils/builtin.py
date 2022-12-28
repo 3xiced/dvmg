@@ -86,6 +86,7 @@ def compile_phase_portrait(histogram_data: list[int], devider: int, bias: int, d
         #     (N[i + 2 * k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i])))
         if dynamic_equation_x is not None and dynamic_equation_y is not None:
             x, y = eval(dynamic_equation_x), eval(dynamic_equation_y)
+            # print(N)
         else:
             x, y = (N[k] - N[0] - N[len(N) - 1] - N[i],
                     N[i + k] - N[len(N) // 2] - N[0] - 3 * N[len(N) - k])
