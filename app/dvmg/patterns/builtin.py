@@ -504,15 +504,20 @@ class Normal(PatternBase):
         self.__gap_y_top = np.random.uniform(
             self.__gap_y_bottom + min_anomaly_height, 1) - self.__gap_y_bottom
         self.__anomaly_width = np.random.uniform(
-            1, self.__x_limit - 2 * self.__min_end_x - self.__min_x)
+            2 * self.__min_end_x, self.__x_limit - self.__min_end_x - self.__min_x)
         self.__anomaly_begin_at_x = np.random.uniform(
             self.__min_x, self.__x_limit - self.__min_end_x - self.__anomaly_width)
-        # print(self.__min_x, self.__x_limit -
-        #       self.__min_end_x - self.__anomaly_width)
+        # print(self.__min_x, self.anomaly_width, self.anomaly_begin_at_x)
         self.__is_reversed = bool(np.random.randint(2))
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        return self.__gap_y_bottom + ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (120 * self.__anomaly_width * 0.5**2)))
+        return self.__gap_y_bottom + ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x - self.__anomaly_width / 2)**2) / (self.__anomaly_width * 2)))
+        # if x < self.anomaly_begin_at_x:
+        #     return self.gap_y_bottom
+        # elif x > self.anomaly_begin_at_x and x < self.anomaly_begin_at_x + self.anomaly_width:
+        #     return self.gap_y_top
+        # else:
+        #     return self.gap_y_bottom
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
@@ -679,9 +684,16 @@ class NormalFlipped(PatternBase):
         # print(self.__min_x, self.__x_limit -
         #       self.__min_end_x - self.__anomaly_width)
         self.__is_reversed = bool(np.random.randint(2))
+        # print(self.anomaly_begin_at_x, self.anomaly_width)
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        return 1 + -1 * self.__gap_y_bottom - ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (120 * self.__anomaly_width * 0.5**2)))
+        # return 1 + -1 * self.__gap_y_bottom - ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (120 * self.__anomaly_width * 0.5**2)))
+        if x < self.anomaly_begin_at_x:
+            return self.gap_y_top
+        elif x > self.anomaly_begin_at_x and x < self.anomaly_begin_at_x + self.anomaly_width:
+            return self.gap_y_bottom
+        else:
+            return self.gap_y_top
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
@@ -858,8 +870,8 @@ class LinearIncrease(PatternBase):
         # k = (self.gap_y_top - self.gap_y_bottom) / (self.anomaly_width)
         # b = self.gap_y_top - k * \
         #     (self.anomaly_begin_at_x + self.anomaly_width)
-        k = (self.gap_y_top - self.gap_y_bottom) / (1000)
-        return k * x + 0.0001
+        k = (self.gap_y_top - self.gap_y_bottom) / (100)
+        return k * x + 0.05
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
@@ -1039,7 +1051,7 @@ class LinearDecrease(PatternBase):
         #     b = self.gap_y_bottom - k * \
         #         (self.anomaly_begin_at_x + self.anomaly_width)
         #     return k * x + b
-        k = (self.gap_y_top - self.gap_y_bottom) / (-1000)
+        k = (self.gap_y_top - self.gap_y_bottom) / (-100)
         return k * x + 0.9999
 
     def generate_coordinates(self) -> dict[float, float]:
@@ -1172,7 +1184,7 @@ class Plain(PatternBase):
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
                             min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
         self.__x_limit = x_limit
-        self.__constant_lambda = np.random.uniform(0, 1)
+        self.__constant_lambda = np.random.uniform(0.3, 1)  # XXX: 0.3
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
         return self.__constant_lambda

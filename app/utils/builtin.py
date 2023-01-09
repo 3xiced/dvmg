@@ -33,6 +33,7 @@ def process_coordinates_to_histogram(coordinates: list[float], devider: int) -> 
     """
     to_hist: list = []
     output_keys: list = list.copy(coordinates)
+    output_keys = sorted(output_keys)
     interval_number = 0
     interval_length = max(output_keys) / devider
     for i in range(0, len(output_keys) - 1):

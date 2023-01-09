@@ -11,6 +11,44 @@ import inspect
 import sys
 import math
 
+SETTINGS = {
+    patterns.Sigmoid: worker.Settings(
+        to_generate=200, min_x=50, min_y=0.1,
+        min_anomaly_height=0.6, min_end_x=50,
+        x_limit=200, max_gap_y_bottom=0.15, is_random=True
+    ),
+    patterns.SigmoidReversed: worker.Settings(
+        to_generate=100, min_x=25, min_y=0.05,
+        min_anomaly_height=0.7, min_end_x=25,
+        x_limit=100, max_gap_y_bottom=0.07, is_random=True
+    ),
+    patterns.Plain: worker.Settings(
+        to_generate=100, min_x=20, min_y=0.01,
+        min_anomaly_height=0.2, min_end_x=20,
+        x_limit=100, max_gap_y_bottom=0.2, is_random=True
+    ),
+    patterns.Normal: worker.Settings(
+        to_generate=60, min_x=10, min_y=0.01,
+        min_anomaly_height=0.97, min_end_x=10,
+        x_limit=60, max_gap_y_bottom=0.03, is_random=True
+    ),
+    patterns.NormalFlipped: worker.Settings(
+        to_generate=150, min_x=30, min_y=0.01,
+        min_anomaly_height=0.85, min_end_x=30,
+        x_limit=150, is_random=True
+    ),
+    patterns.LinearIncrease: worker.Settings(
+        to_generate=100, min_x=10, min_y=0.1,
+        min_anomaly_height=0.89, min_end_x=10,
+        x_limit=100, max_gap_y_bottom=0.1, is_random=True
+    ),
+    patterns.LinearDecrease: worker.Settings(
+        to_generate=100, min_x=10, min_y=0.01,
+        min_anomaly_height=0.89, min_end_x=10,
+        x_limit=100, max_gap_y_bottom=0.01, is_random=True
+    )
+}
+
 
 class Graph(pg.GraphItem):
     """Виджет интерактивного графа с точками
@@ -233,7 +271,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 x_limit=self.to_generateSlider.value(), max_gap_y_bottom=self.max_gap_y_bottomSlider.value() / 100, is_random=True
             )
         generatorWorker = worker.GeneratorWorker(
-            settings, self.patternsComboBox.currentData()(), processors.ExponentialProcessor())
+            SETTINGS[self.patternsComboBox.currentData()], self.patternsComboBox.currentData()(), processors.ExponentialProcessor())
 
         # Generate coordinates
         coordinates, processed_coordinates = generatorWorker.run()
