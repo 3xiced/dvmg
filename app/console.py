@@ -2,54 +2,52 @@
 
 from dvmg import worker, patterns, processors
 from utils import *
-from collections import Counter
+from typing import Callable
 
 import os
-import math
-import uuid
 import inspect
 import json
 
 SETTINGS = {
     patterns.Sigmoid: worker.Settings(
-        to_generate=200, min_x=50, min_y=0.1,
-        min_anomaly_height=0.6, min_end_x=50,
-        x_limit=200, max_gap_y_bottom=0.15, is_random=True
+        to_generate=1000, min_x=200, min_y=0.05,
+        min_anomaly_height=0.6, min_end_x=200,
+        x_limit=1000, max_gap_y_bottom=0.1, is_random=True
     ),
     patterns.SigmoidReversed: worker.Settings(
-        to_generate=100, min_x=25, min_y=0.05,
-        min_anomaly_height=0.7, min_end_x=25,
-        x_limit=100, max_gap_y_bottom=0.07, is_random=True
+        to_generate=1000, min_x=250, min_y=0.05,
+        min_anomaly_height=0.7, min_end_x=250,
+        x_limit=1000, max_gap_y_bottom=0.07, is_random=True
     ),
     patterns.Plain: worker.Settings(
-        to_generate=100, min_x=20, min_y=0.01,
-        min_anomaly_height=0.2, min_end_x=20,
-        x_limit=100, max_gap_y_bottom=0.2, is_random=True
+        to_generate=1000, min_x=200, min_y=0.1,
+        min_anomaly_height=0.89, min_end_x=200,
+        x_limit=1000, max_gap_y_bottom=0.1, is_random=True
     ),
     patterns.Normal: worker.Settings(
-        to_generate=60, min_x=10, min_y=0.01,
-        min_anomaly_height=0.97, min_end_x=10,
-        x_limit=60, max_gap_y_bottom=0.03, is_random=True
+        to_generate=1000, min_x=180, min_y=0.01,
+        min_anomaly_height=0.97, min_end_x=180,
+        x_limit=1000, max_gap_y_bottom=0.03, is_random=True
     ),
     patterns.NormalFlipped: worker.Settings(
-        to_generate=150, min_x=30, min_y=0.01,
-        min_anomaly_height=0.85, min_end_x=30,
-        x_limit=150, is_random=True
+        to_generate=1000, min_x=400, min_y=0.01,
+        min_anomaly_height=0.85, min_end_x=200,
+        x_limit=1000, is_random=True
     ),
     patterns.LinearIncrease: worker.Settings(
-        to_generate=100, min_x=10, min_y=0.1,
-        min_anomaly_height=0.89, min_end_x=10,
-        x_limit=100, max_gap_y_bottom=0.1, is_random=True
+        to_generate=1000, min_x=100, min_y=0.1,
+        min_anomaly_height=0.89, min_end_x=100,
+        x_limit=1000, max_gap_y_bottom=0.1, is_random=True
     ),
     patterns.LinearDecrease: worker.Settings(
-        to_generate=100, min_x=10, min_y=0.01,
-        min_anomaly_height=0.89, min_end_x=10,
-        x_limit=100, max_gap_y_bottom=0.01, is_random=True
+        to_generate=1000, min_x=100, min_y=0.1,
+        min_anomaly_height=0.89, min_end_x=100,
+        x_limit=1000, max_gap_y_bottom=0.01, is_random=True
     )
 }
 
 
-def generate(pattern_signature: patterns.PatternBase, devider: int = 200, dx: str | None = None, dy: str | None = None) -> tuple[list[int], list[int]]:
+def generate(pattern_signature: patterns.PatternBase, reconstruction_method: Callable, bias: int = 20, devider: int = 200, dx: str | None = None, dy: str | None = None) -> tuple[list[int], list[int]]:
     """Функция генерирует реконструкции фазовых портретов для всех паттернов и записывает их в файлы
 
     Args:
@@ -78,9 +76,9 @@ def generate(pattern_signature: patterns.PatternBase, devider: int = 200, dx: st
         list(output.keys()), devider)
 
     delta_x, delta_y = compile_phase_portrait(
-        to_hist, devider, 30, dx, dy)
+        to_hist, devider, bias, dx, dy)
 
-    quantilies_x, quantilies_y = compile_phase_reconstruction_octante(
+    quantilies_x, quantilies_y = reconstruction_method(
         delta_x, delta_y)
 
     if len(quantilies_y) != len(quantilies_x):
@@ -89,7 +87,7 @@ def generate(pattern_signature: patterns.PatternBase, devider: int = 200, dx: st
     return (quantilies_x, quantilies_y)
 
 
-def main():
+def main(reconstruction_method: Callable, bias: int = 20, devider: int = 200, dx: str | None = None, dy: str | None = None) -> None:
     """
     Точка входа в программу
     """
@@ -98,7 +96,7 @@ def main():
     __f_patterns_list: list = [
         ptrn for ptrn in __patterns_list if ptrn[0] != 'PatternBase' and ptrn[0] != 'Custom']
 
-    _uuid = uuid.uuid4().hex
+    # _uuid = uuid.uuid4().hex
     if not os.path.isdir('dataset'):
         os.mkdir("dataset")
 
@@ -107,17 +105,17 @@ def main():
         name, signature = __f_patterns_list[i]
         print(f'Generating {name} - {signature}')
         for _ in range(3000):
-            qx, qy = generate(
-                signature, dx="N[i]-N[i+1]", dy="N[i]-(N[i+k]-N[i+k//2])")
+            qx, qy = generate(signature, reconstruction_method,
+                              bias, devider, dx, dy)
 
             if name not in data:
                 data[name] = []
             data[name].append(dict(x=qx, y=qy))
 
     json_string = json.dumps(data)
-    with open(f'dataset/{_uuid}.json', 'w') as outfile:
+    with open(f'dataset/{reconstruction_method.__name__}.json', 'w') as outfile:
         outfile.write(json_string)
 
 
 if __name__ == '__main__':
-    main()
+    main(compile_phase_reconstruction_quantile)

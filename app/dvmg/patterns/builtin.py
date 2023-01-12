@@ -511,7 +511,8 @@ class Normal(PatternBase):
         self.__is_reversed = bool(np.random.randint(2))
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        return self.__gap_y_bottom + ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x - self.__anomaly_width / 2)**2) / (self.__anomaly_width * 2)))
+        # 2 для небольшого числа событий
+        return self.__gap_y_bottom + ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x - self.__anomaly_width / 2)**2) / (self.__anomaly_width * 80)))
         # if x < self.anomaly_begin_at_x:
         #     return self.gap_y_bottom
         # elif x > self.anomaly_begin_at_x and x < self.anomaly_begin_at_x + self.anomaly_width:
@@ -687,13 +688,13 @@ class NormalFlipped(PatternBase):
         # print(self.anomaly_begin_at_x, self.anomaly_width)
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
-        # return 1 + -1 * self.__gap_y_bottom - ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (120 * self.__anomaly_width * 0.5**2)))
-        if x < self.anomaly_begin_at_x:
-            return self.gap_y_top
-        elif x > self.anomaly_begin_at_x and x < self.anomaly_begin_at_x + self.anomaly_width:
-            return self.gap_y_bottom
-        else:
-            return self.gap_y_top
+        return 1 + -1 * self.__gap_y_bottom - ((self.__gap_y_top) * exp((-(x - self.__anomaly_begin_at_x)**2) / (self.__anomaly_width * 90)))
+        # if x < self.anomaly_begin_at_x:
+        #     return self.gap_y_top
+        # elif x > self.anomaly_begin_at_x and x < self.anomaly_begin_at_x + self.anomaly_width:
+        #     return self.gap_y_bottom
+        # else:
+        #     return self.gap_y_top
 
     def generate_coordinates(self) -> dict[float, float]:
         self.__coordinates: dict[float, float] = dict()
@@ -870,7 +871,7 @@ class LinearIncrease(PatternBase):
         # k = (self.gap_y_top - self.gap_y_bottom) / (self.anomaly_width)
         # b = self.gap_y_top - k * \
         #     (self.anomaly_begin_at_x + self.anomaly_width)
-        k = (self.gap_y_top - self.gap_y_bottom) / (100)
+        k = (self.gap_y_top - self.gap_y_bottom) / (self.x_limit)
         return k * x + 0.05
 
     def generate_coordinates(self) -> dict[float, float]:
@@ -1051,7 +1052,7 @@ class LinearDecrease(PatternBase):
         #     b = self.gap_y_bottom - k * \
         #         (self.anomaly_begin_at_x + self.anomaly_width)
         #     return k * x + b
-        k = (self.gap_y_top - self.gap_y_bottom) / (-100)
+        k = (self.gap_y_top - self.gap_y_bottom) / (-self.x_limit)
         return k * x + 0.9999
 
     def generate_coordinates(self) -> dict[float, float]:
@@ -1184,7 +1185,7 @@ class Plain(PatternBase):
     def random_start_values(self, min_x: float, min_y: float, min_anomaly_height: float,
                             min_end_x: float, x_limit: int, max_gap_y_bottom: Optional[float] = None) -> None:
         self.__x_limit = x_limit
-        self.__constant_lambda = np.random.uniform(0.3, 1)  # XXX: 0.3
+        self.__constant_lambda = np.random.uniform(0.01, 0.7)  # XXX: 0.3
 
     def function(self, x: float, dispersion: Optional[float] = None, expected_value: Optional[float] = None) -> float:
         return self.__constant_lambda

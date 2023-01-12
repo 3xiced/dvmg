@@ -11,7 +11,7 @@ import inspect
 import sys
 import math
 
-SETTINGS = {
+SETTINGS_DEPRECATED = {
     patterns.Sigmoid: worker.Settings(
         to_generate=200, min_x=50, min_y=0.1,
         min_anomaly_height=0.6, min_end_x=50,
@@ -46,6 +46,44 @@ SETTINGS = {
         to_generate=100, min_x=10, min_y=0.01,
         min_anomaly_height=0.89, min_end_x=10,
         x_limit=100, max_gap_y_bottom=0.01, is_random=True
+    )
+}
+
+SETTINGS = {
+    patterns.Sigmoid: worker.Settings(
+        to_generate=1000, min_x=200, min_y=0.05,
+        min_anomaly_height=0.6, min_end_x=200,
+        x_limit=1000, max_gap_y_bottom=0.1, is_random=True
+    ),
+    patterns.SigmoidReversed: worker.Settings(
+        to_generate=1000, min_x=250, min_y=0.05,
+        min_anomaly_height=0.7, min_end_x=250,
+        x_limit=1000, max_gap_y_bottom=0.07, is_random=True
+    ),
+    patterns.Plain: worker.Settings(
+        to_generate=1000, min_x=200, min_y=0.1,
+        min_anomaly_height=0.89, min_end_x=200,
+        x_limit=1000, max_gap_y_bottom=0.1, is_random=True
+    ),
+    patterns.Normal: worker.Settings(
+        to_generate=1000, min_x=180, min_y=0.01,
+        min_anomaly_height=0.97, min_end_x=180,
+        x_limit=1000, max_gap_y_bottom=0.03, is_random=True
+    ),
+    patterns.NormalFlipped: worker.Settings(
+        to_generate=1000, min_x=400, min_y=0.01,
+        min_anomaly_height=0.85, min_end_x=200,
+        x_limit=1000, is_random=True
+    ),
+    patterns.LinearIncrease: worker.Settings(
+        to_generate=1000, min_x=100, min_y=0.1,
+        min_anomaly_height=0.89, min_end_x=100,
+        x_limit=1000, max_gap_y_bottom=0.1, is_random=True
+    ),
+    patterns.LinearDecrease: worker.Settings(
+        to_generate=1000, min_x=100, min_y=0.1,
+        min_anomaly_height=0.89, min_end_x=100,
+        x_limit=1000, max_gap_y_bottom=0.01, is_random=True
     )
 }
 

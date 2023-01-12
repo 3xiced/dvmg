@@ -3,19 +3,35 @@
 import os
 import sys
 
-sys.path.append("..")
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+sys.path.insert(1, os.path.join(sys.path[0], '../app'))
 
 from os import listdir
 from os.path import isfile, join
 import app.dvmg.patterns
+import app.console as cs
+import app.utils as ut
 import numpy as np
 import json
 import inspect
+from typing import Callable
 
 import tensorflow as tf
-from keras.models import Sequential
-from keras.layers import Dense, Input
 from keras.utils import to_categorical
+
+methods: list[Callable] = [ut.compile_phase_reconstruction_octante,
+                           ut.compile_phase_reconstruction_quantile,
+                           ut.compile_phase_reconstruction_weight_center]
+
+inputs: dict[Callable, int] = {ut.compile_phase_reconstruction_octante: 14,
+                               ut.compile_phase_reconstruction_quantile: 14,
+                               ut.compile_phase_reconstruction_weight_center: 16}
+
+method = methods[int(input(
+    f"Choose reconstruction method from list {methods} by it's index: 0, 1..."))]
+
+cs.main(method, dx="(N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k] - N[i + k // 2]))))",
+        dy="(N[i + k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i]))")
 
 # Get patterns list
 patterns_list: list = inspect.getmembers(
@@ -27,8 +43,8 @@ print(f_patterns_list)
 
 # Create DataSet
 
-onlyfiles = [f for f in listdir("../dataset/")
-             if isfile(join("../dataset/", f))]
+onlyfiles = [f for f in listdir("./dataset/")
+             if isfile(join("./dataset/", f))]
 
 # Create empty dataset lists
 dataset_model_1: list[tuple[tuple, str]] = list()  # ((X,y), pattern_name)
@@ -39,8 +55,7 @@ dataset_model_2: list[tuple[np.ndarray, int]] = list()  # (X, class_id)
 test_dataset_model_2: list[tuple[np.ndarray, int]] = list()  # (X, class_id)
 
 # Paths to data files
-training_file_path = f'../dataset/{onlyfiles[0]}'
-test_file_path = f'../dataset/{onlyfiles[1]}'
+training_file_path = f'dataset/{onlyfiles[0]}'
 
 
 def parse(path: str, pattern_name: str) -> tuple[np.ndarray, np.ndarray, list]:
@@ -48,7 +63,7 @@ def parse(path: str, pattern_name: str) -> tuple[np.ndarray, np.ndarray, list]:
     # Данные для обучения для полносвязной НС
     X_model_2: list[tuple[np.ndarray, list]] = list()
     # Данные для обучения (координаты реконструкции фазового портрета) до сортировки для перцептронов
-    X_model_1 = np.empty((0, 14), int)
+    X_model_1 = np.empty((0, inputs[method]), int)
     # 1 - соответствует правильному паттерну, на который тренируется сеть, 0 - всем остальным до сортировки для перцептронов
     y_model_1 = np.array([])
 
@@ -90,19 +105,10 @@ for ptrn in f_patterns_list:
     dataset_model_1 += [((X_model_1, y_model_1), pattern_name)]
     dataset_model_2 = [*dataset_model_2, *X_model_2]
 
-    test_data = parse(test_file_path, pattern_name)
-
-    X_model_1 = test_data["X_model_1"]  # type: ignore
-    y_model_1 = test_data["y_model_1"]  # type: ignore
-    X_model_2 = test_data["X_model_2"]  # type: ignore
-
-    test_dataset_model_1 += [((X_model_1, y_model_1), pattern_name)]
-    test_dataset_model_2 = [*test_dataset_model_2, *X_model_2]
-
 # print(dataset_model_1[0])
 # print('\n-----------------\n')
-print(dataset_model_2[0])
-print('\n-----------------\n')
+# print(dataset_model_2[0])
+# print('\n-----------------\n')
 
 # print(test_dataset_model_1[0])
 # print('\n-----------------\n')
@@ -123,23 +129,14 @@ y_train = to_categorical(y_train, 7)
 
 print(x_train, y_train)
 
-# Create model
-model: Sequential = Sequential()
-model.add(Input(shape=(14,)))
-model.add(Dense(48, activation='sigmoid', name='hidden_1'))
-model.add(Dense(24, activation='relu', name='hidden_2'))
-model.add(Dense(12, activation='relu', name='hidden_3'))
-model.add(Dense(7, activation='softmax', name='output'))
+import models
 
-model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
+models_list: list = inspect.getmembers(
+    models, inspect.isclass)
 
-model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
-
-model.fit(x_train, y_train, batch_size=20, epochs=5)
+model: models.ModelBase = models_list[int(input(
+    f"Choose model to use from models list {models_list} by its index 0, 1..."))][1]()  # type: ignore
+model.fit(x_train, y_train, epochs=10)  # type: ignore
 
 # Test on real data
 from datetime import datetime, timedelta
@@ -150,7 +147,7 @@ import os
 sys.path.insert(0, os.path.abspath('..'))
 from app.utils import *
 
-lines: list = open('./data/cameraDetections.txt').read().splitlines()
+lines: list = open('./net/data/cameraDetections.txt').read().splitlines()
 
 timestamps: list = list()
 
@@ -175,11 +172,11 @@ DEVIDER = 100
 
 counter = 0
 start_time = dt_objects[0] - timedelta(minutes=15)
-end_time = start_time + timedelta(hours=12)
+end_time = start_time + timedelta(hours=1)
 while end_time < dt_objects[-1]:
     counter += 1
     start_time = start_time + timedelta(minutes=15)
-    end_time = start_time + timedelta(hours=12)
+    end_time = start_time + timedelta(hours=1)
 
     to_inspect_timestamps: list[float] = [
         dt.timestamp() for dt in dt_objects if dt > start_time and dt <= end_time]
@@ -198,12 +195,11 @@ while end_time < dt_objects[-1]:
     # print(list(output.keys()))
     to_hist = process_coordinates_to_histogram(list(output.keys()), DEVIDER)
     x, y = compile_phase_portrait(to_hist, DEVIDER, 20)
-    rx, ry = compile_phase_reconstruction_quantile(x, y)
+    rx, ry = method(x, y)
     test_data = tf.convert_to_tensor(np.array(rx + ry), tf.float32)
 
     # Predict and print
-    prediction = model.predict(tf.expand_dims(
-        test_data, axis=0))  # type: ignore
+    prediction = model.predict(test_data)  # type: ignore
     tt = start_time.strftime('%Y-%m-%d %H:%M:%S').replace(':', '-')
     class_name = f_patterns_list[prediction.tolist()[0].index(
         max(prediction.tolist()[0]))][0]
@@ -215,7 +211,7 @@ while end_time < dt_objects[-1]:
     plt.yticks([1])
     plt.xlabel("время, c")
     plt.ylabel("событие")
-    plt.savefig(f'./images/events/{tt}+{class_name}.png')
+    plt.savefig(f'./net/images/events/{tt}+{class_name}.png')
 
 
 # timestamps = timestamps[66:120] #78 #169
