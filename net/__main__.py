@@ -19,6 +19,9 @@ from typing import Callable
 import tensorflow as tf
 from keras.utils import to_categorical
 
+DX = "(N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k] - N[i + k // 2]))))"
+DY = "(N[i + k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i]))"
+
 methods: list[Callable] = [ut.compile_phase_reconstruction_octante,
                            ut.compile_phase_reconstruction_quantile,
                            ut.compile_phase_reconstruction_weight_center]
@@ -30,8 +33,7 @@ inputs: dict[Callable, int] = {ut.compile_phase_reconstruction_octante: 14,
 method = methods[int(input(
     f"Choose reconstruction method from list {methods} by it's index: 0, 1..."))]
 
-cs.main(method, dx="(N[0] - N[i + k // 4]) - ((N[len(N.keys()) - 1] - N[0]) - (N[len(N.keys()) // 2] - (N[i + k] - N[i] - (N[i + k] - N[i + k // 2]))))",
-        dy="(N[i + k] - N[i]) - (N[i + 1] - N[i + k] - (N[0] - N[i]))")
+cs.main(method, dx=DX, dy=DY)
 
 # Get patterns list
 patterns_list: list = inspect.getmembers(
@@ -172,11 +174,11 @@ DEVIDER = 100
 
 counter = 0
 start_time = dt_objects[0] - timedelta(minutes=15)
-end_time = start_time + timedelta(hours=1)
+end_time = start_time + timedelta(hours=12)
 while end_time < dt_objects[-1]:
     counter += 1
     start_time = start_time + timedelta(minutes=15)
-    end_time = start_time + timedelta(hours=1)
+    end_time = start_time + timedelta(hours=12)
 
     to_inspect_timestamps: list[float] = [
         dt.timestamp() for dt in dt_objects if dt > start_time and dt <= end_time]
@@ -194,7 +196,7 @@ while end_time < dt_objects[-1]:
         output[time] = 1
     # print(list(output.keys()))
     to_hist = process_coordinates_to_histogram(list(output.keys()), DEVIDER)
-    x, y = compile_phase_portrait(to_hist, DEVIDER, 20)
+    x, y = compile_phase_portrait(to_hist, DEVIDER, 20, DX, DY)
     rx, ry = method(x, y)
     test_data = tf.convert_to_tensor(np.array(rx + ry), tf.float32)
 
@@ -212,6 +214,17 @@ while end_time < dt_objects[-1]:
     plt.xlabel("время, c")
     plt.ylabel("событие")
     plt.savefig(f'./net/images/events/{tt}+{class_name}.png')
+
+    # plt.close('all')
+    # plt.plot(x, y)
+    # plt.savefig(f'./net/images/events/{tt}+{class_name}+phase.png')
+
+    # plt.close('all')
+    # plt.plot(rx, ry)
+    # plt.savefig(f'./net/images/events/{tt}+{class_name}+phase+recon.png')
+
+    # if counter == 10:
+    #     break
 
 
 # timestamps = timestamps[66:120] #78 #169
