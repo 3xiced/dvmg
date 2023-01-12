@@ -170,7 +170,7 @@ for tmsp in timestamps:
         tmsp).strftime('%Y-%m-%d %H:%M:%S.%f')]
     dt_objects += [datetime.fromtimestamp(tmsp)]
 
-DEVIDER = 100
+DEVIDER = 200
 
 counter = 0
 start_time = dt_objects[0] - timedelta(minutes=15)
