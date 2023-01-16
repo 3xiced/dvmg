@@ -120,3 +120,64 @@ class l3i42(ModelBase):
 
     def predict(self, data: Tensor) -> Any:
         return self._model.predict(tf.expand_dims(data, axis=0))
+
+
+class l3i28(ModelBase):
+    """3 скрытых слоя, 28 входа - 3 реконструкции quantile/weightcenter, etc., sigmoid, sigmoid, sigmoid\n
+    Модель для множественной параллельной реконструкции в 3 их разновидности
+
+    Args:
+        ModelBase (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    def __init__(self):
+        self._model: Sequential = Sequential()
+        self._model.add(Input(shape=(28,)))
+        self._model.add(Dense(102, activation='sigmoid', name='hidden_1'))
+        self._model.add(Dense(56, activation='sigmoid', name='hidden_2'))
+        self._model.add(Dense(24, activation='sigmoid', name='hidden_3'))
+        self._model.add(Dense(7, activation='softmax', name='output'))
+
+        self._model.compile(optimizer='adam',
+                            loss='categorical_crossentropy',
+                            metrics=['accuracy'])
+
+    def fit(self, x_train: Union[Tensor, list], y_train: Union[Tensor, list], batch_size: int = 20, epochs: int = 5) -> None:
+        self._model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs)
+
+    def predict(self, data: Tensor) -> Any:
+        return self._model.predict(tf.expand_dims(data, axis=0))
+
+
+class l4i56(ModelBase):
+    """4 скрытых слоя, 56 входа - 3 реконструкции quantile/weightcenter, etc., sigmoid, sigmoid, sigmoid\n
+    Модель для множественной параллельной реконструкции в 3 их разновидности
+
+    Args:
+        ModelBase (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    def __init__(self):
+        self._model: Sequential = Sequential()
+        self._model.add(Input(shape=(56,)))
+        self._model.add(Dense(256, activation='sigmoid', name='hidden_1'))
+        self._model.add(Dense(128, activation='sigmoid', name='hidden_2'))
+        self._model.add(Dense(64, activation='sigmoid', name='hidden_3'))
+        self._model.add(Dense(32, activation='sigmoid', name='hidden_4'))
+        self._model.add(Dense(7, activation='softmax', name='output'))
+
+        self._model.compile(optimizer='adam',
+                            loss='categorical_crossentropy',
+                            metrics=['accuracy'])
+
+    def fit(self, x_train: Union[Tensor, list], y_train: Union[Tensor, list], batch_size: int = 20, epochs: int = 5) -> None:
+        self._model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs)
+
+    def predict(self, data: Tensor) -> Any:
+        return self._model.predict(tf.expand_dims(data, axis=0))
