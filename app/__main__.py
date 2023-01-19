@@ -1,9 +1,8 @@
 from dvmg import worker, patterns, processors
 from PyQt6 import QtWidgets, QtCore
 from ui import Ui_MainWindow
-from accessify import private, protected
-from collections import Counter
-from utils import *
+from accessify import private
+from dvmg.utils import *
 
 import pyqtgraph as pg
 import numpy as np

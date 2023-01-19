@@ -1,5 +1,6 @@
 # Dataset folder
 dataset/
+dataset_modified/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

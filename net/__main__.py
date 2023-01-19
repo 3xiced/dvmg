@@ -8,9 +8,9 @@ sys.path.insert(1, os.path.join(sys.path[0], '../app'))
 
 from os import listdir
 from os.path import isfile, join
-import app.dvmg.patterns
+import dvmg.patterns
 import app.console as cs
-import app.utils as ut
+import dvmg.utils as ut
 import numpy as np
 import json
 import inspect
@@ -37,7 +37,7 @@ cs.main(method, dx=DX, dy=DY)
 
 # Get patterns list
 patterns_list: list = inspect.getmembers(
-    app.dvmg.patterns, inspect.isclass)
+    dvmg.patterns, inspect.isclass)
 f_patterns_list: list = [
     ptrn for ptrn in patterns_list if ptrn[0] != 'PatternBase' and ptrn[0] != 'Custom']
 
@@ -45,8 +45,8 @@ print(f_patterns_list)
 
 # Create DataSet
 
-onlyfiles = [f for f in listdir("./dataset/")
-             if isfile(join("./dataset/", f))]
+onlyfiles = [f for f in listdir("./net/dataset/")
+             if isfile(join("./net/dataset/", f))]
 
 # Create empty dataset lists
 dataset_model_1: list[tuple[tuple, str]] = list()  # ((X,y), pattern_name)
@@ -57,7 +57,7 @@ dataset_model_2: list[tuple[np.ndarray, int]] = list()  # (X, class_id)
 test_dataset_model_2: list[tuple[np.ndarray, int]] = list()  # (X, class_id)
 
 # Paths to data files
-training_file_path = f'dataset/{onlyfiles[0]}'
+training_file_path = f'./net/dataset/{onlyfiles[0]}'
 
 
 def parse(path: str, pattern_name: str) -> tuple[np.ndarray, np.ndarray, list]:
@@ -147,7 +147,7 @@ from matplotlib import pyplot as plt
 import sys
 import os
 sys.path.insert(0, os.path.abspath('..'))
-from app.utils import *
+from dvmg.utils import *
 
 lines: list = open('./net/data/cameraDetections.txt').read().splitlines()
 

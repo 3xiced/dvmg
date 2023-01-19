@@ -1,7 +1,7 @@
 """Файл запуска dvmg с помощью cmd для генерации больших массивов данных"""
 
 from dvmg import worker, patterns, processors
-from utils import *
+from dvmg.utils import *
 from typing import Callable
 
 import os
