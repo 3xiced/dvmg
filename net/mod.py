@@ -149,7 +149,7 @@ import os
 sys.path.insert(0, os.path.abspath('..'))
 from dvmg.utils import *
 
-lines: list = open('./net/data/cameraDetections.txt').read().splitlines()
+lines: list = open('./cameraDetections.txt').read().splitlines()
 
 timestamps: list = list()
 
