@@ -321,3 +321,16 @@ def compile_phase_reconstruction_weight_center(x: list[int], y: list[int]) -> tu
 
     # print(coordinates_x, coordinates_y)
     return (coordinates_x, coordinates_y)
+
+
+def normalize(x: list[int], y: list[int]) -> tuple[list[float], list[float]]:
+    abs_x = [abs(i) for i in x]
+    abs_y = [abs(i) for i in y]
+
+    mx = max(abs_x)
+    my = max(abs_y)
+
+    nx = [i / mx for i in x]
+    ny = [i / my for i in y]
+
+    return (nx, ny)
